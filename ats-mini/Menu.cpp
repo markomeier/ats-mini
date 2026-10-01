@@ -1999,14 +1999,14 @@ static void drawInfo(int x, int y, int sx)
   spr.drawString("Vol:", 6+x, 64+y+(0*16), FONT_SMALL);
   if(muteOn(MUTE_MAIN) || muteOn(MUTE_SQUELCH))
   {
-    spr.setTextColor(TH.box_off_text, TH.box_off_bg);
+    spr.setTextColor(0xF800);
     sprintf(text, muteOn(MUTE_MAIN) ? "Muted" : "%d/sq", volume);
     spr.drawString(text, 48+x, 64+y+(0*16), FONT_SMALL);
-    spr.setTextColor(TH.box_text);
+    spr.setTextColor(0x07E0);
   }
   else
   {
-    spr.setTextColor(TH.box_text);
+    spr.setTextColor(0x07E0);
     spr.drawNumber(volume, 48+x, 64+y+(0*16), FONT_SMALL);
   }
 
