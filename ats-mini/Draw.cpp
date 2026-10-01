@@ -122,7 +122,7 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 
   spr.setTextDatum(TL_DATUM);
   spr.setTextColor(0x07E0);
-  uint16_t mode_width = spr.drawString(mode, x + band_width / 2 + 12, y + 2, FONT_SMALL);
+  uint16_t mode_width = spr.drawString(mode, x + band_width / 2 + 10, y);
 
  // spr.drawRoundRect(x + band_width / 2 + 8, y + 7, mode_width + 8, 17, 4, TH.mode_border);
 }
