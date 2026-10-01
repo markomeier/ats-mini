@@ -96,19 +96,19 @@ int8_t menuIdx = MENU_VOLUME;
 
 static const char *menu[] =
 {
-  "Mode",
-  "Band",
-  "Volume",
-  "Step",
-  "Seek",
-  "Scan",
-  "Memory",
-  "Squelch",
-  "Bandwidth",
+  "AM-SSB",
+  "BAENDER",
+  "LAUTST.",
+  "STEPS",
+  "SUCHE",
+  "SCANNEN",
+  "SPEICHER",
+  "RAUSCHE",
+  "BANDBR.",
   "AGC/ATTN",
   "AVC",
-  "SoftMute",
-  "Settings",
+  "SOFT-MUTE",
+  "EINSTELL.",
 };
 
 //
@@ -145,27 +145,27 @@ int8_t settingsIdx = MENU_BRIGHTNESS;
 
 static const char *settings[] =
 {
-  "Brightness",
-  "Date/Time",
-  "UTC Offset",
-  "Sleep",
-  "Sleep Mode",
-  "Theme",
-  "UI Layout",
-  "Zoom Menu",
+  "HELLIGKEIT",
+  "DATUM-ZEIT",
+  "UTC OFFSET",
+  "SCHLAF",
+  "SCHLAFMODUS",
+  "THEMEN",
+  "UI DESIGN",
+  "ZOOM-MENUE",
   "Scroll Dir.",
   "RDS",
-  "FM Stereo",
-  "FM Region",
+  "UKW STEREO",
+  "UKW REGION",
   "Calibration",
   "DSP Patches",
-  "Load EiBi",
+  "LADE EiBi",
   "Update FW",
   "USB Port",
   "TCP Port",
   "Bluetooth",
   "Wi-Fi",
-  "About",
+  "UEBER",
 };
 
 //
