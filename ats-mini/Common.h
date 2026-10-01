@@ -15,13 +15,13 @@ static constexpr const lgfx::IFont* FONT_LARGE   = &lgfx::fonts::Font4;  // 26px
 static constexpr const lgfx::IFont* FONT_DIGITS  = &lgfx::fonts::Font7;  // 48px 7-segment digits
 
 #define RECEIVER_DESC  "ESP32-SI4732 Receiver"
-#define RECEIVER_NAME  "ATS-Mini V4"
+#define RECEIVER_NAME  "ATS-Mini V4 von Andre"
 #define FIRMWARE_URL   "https://github.com/music4ever2026-collab/ats-mini"
 #define MANUAL_URL     "https://esp32-si4732.github.io/ats-mini/manual.html"
 #define AUTHORS_LINE1  "Authoren: PU2CLR (Ricardo Caratti),"
 #define AUTHORS_LINE2  "Volos Projects, Ralph Xavier, Sunnygold,"
 #define AUTHORS_LINE3  "Goshante, G8PTN (Dave), R9UCL (Max Arnold),Marat Fayzullin"
-#define AUTHORS_LINE4  "UEBERSETZUNG UND MODS- 13HN2709 - Andre Schlueter"
+#define AUTHORS_LINE4  "UEBERSETZUNG: 13HN2709 (Andre Schlueter)"
 
 #define VER_APP        242  // Firmware version
 #define VER_OTA          1  // OTA compatibility; bump when a full USB flash is required
