@@ -3,6 +3,10 @@
 The user manual is available at <https://esp32-si4732.github.io/ats-mini/manual.html>. The firmware flashing instructions are available at <https://esp32-si4732.github.io/ats-mini/flash.html>
 
 <!-- towncrier release notes start -->
+## 2.42 DE (2026-10-01)
+
+- Translated Menü Items to German
+
 
 ## 2.42 (2026-09-30)
 
