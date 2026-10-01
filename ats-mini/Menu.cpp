@@ -1974,7 +1974,7 @@ static void drawInfo(int x, int y, int sx)
 
   // Info box
   spr.setTextDatum(ML_DATUM);
-  spr.setTextColor(TH.box_text);
+  spr.setTextColor(0x07E0);
   spr.fillRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.box_bg);
   spr.drawRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.box_border);
 
