@@ -31,9 +31,9 @@ int bandIdx = 0;
 // Do not forget to update the bands table in the manual.md
 Band bands[] =
 {
-  {"VHF",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 2, 0, 0, 0},
+  {"UKW",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 2, 0, 0, 0},
   // All band. LW, MW and SW (from 150kHz to 30MHz)
-  {"ALL",  SW_BAND_TYPE, AM,    150, 30000, 15000, 1, 4, 0, 0},
+  {"ALLE",  SW_BAND_TYPE, AM,    150, 30000, 15000, 1, 4, 0, 0},
   {"11M",  SW_BAND_TYPE, AM,  25600, 26100, 25850, 1, 4, 0, 0},
   {"13M",  SW_BAND_TYPE, AM,  21500, 21900, 21650, 1, 4, 0, 0},
   {"15M",  SW_BAND_TYPE, AM,  18900, 19100, 18950, 1, 4, 0, 0},
@@ -157,14 +157,14 @@ static const char *settings[] =
   "RDS",
   "UKW STEREO",
   "UKW REGION",
-  "Calibration",
+  "KALIBRIEREN",
   "DSP Patches",
   "LADE EiBi",
   "Update FW",
   "USB Port",
   "TCP Port",
   "Bluetooth",
-  "Wi-Fi",
+  "WLAN",
   "UEBER",
 };
 
