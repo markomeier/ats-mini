@@ -1,3 +1,11 @@
+Dies ist die Übersetzte Originalversion ins Deutsche mit einigen 
+Grafischen Änderungen für bessere Lesbarkeit.
+
+Vielen herzlichen Dank dann die Originaleb Entwickler.
+
+Infos zu den Entwicklern und Anleitungen siehe unten.
+
+
 # ATS Mini
 
 ![](docs/source/_static/esp32-si4732-ui-theme.jpg)
