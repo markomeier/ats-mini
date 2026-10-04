@@ -117,11 +117,11 @@ void drawMessage(const char *msg)
 void drawBandAndMode(const char *band, const char *mode, int x, int y)
 {
   spr.setTextDatum(TC_DATUM);
-  spr.setTextColor(0x07E0);
+  spr.setTextColor(0xFCA0);
   uint16_t band_width = spr.drawString(band, x, y);
 
   spr.setTextDatum(TL_DATUM);
-  spr.setTextColor(0x07E0);
+  spr.setTextColor(0xFCA0);
   uint16_t mode_width = spr.drawString(mode, x + band_width / 2 + 10, y);
 
  // spr.drawRoundRect(x + band_width / 2 + 8, y + 7, mode_width + 8, 17, 4, TH.mode_border);
@@ -202,7 +202,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     // FM frequency
     spr.drawFloat(freq/100.00, 2, x, y, FONT_DIGITS);
     spr.setTextDatum(ML_DATUM);
-    spr.setTextColor(TH.funit_text);
+    spr.setTextColor(0xFCA0);
     spr.drawString("MHz", ux, uy);
   }
   else
@@ -230,7 +230,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     }
 
     // SSB/AM frequencies are measured in kHz
-    spr.setTextColor(TH.funit_text);
+    spr.setTextColor(0xFCA0);
     spr.drawString("kHz", ux, uy);
   }
 
