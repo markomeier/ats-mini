@@ -251,18 +251,19 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 }
 
 //
-//
-// Draw tuner scale Roehrenradiostyle (Horizontale Ausrichtung)
+// Draw tuner scale Roehrenradiostyle (Richtig positioniert unten)
 //
 void drawScale(uint32_t freq)
 {
-  // 1. Roter Zeiger (oben über der Skala)
-  spr.fillTriangle(156, 100, 160, 110, 164, 100, 0xF800);
-  spr.drawFastVLine(160, 110, 25, 0xF800);
+  // 1. Roter Zeiger (Dreieck sitzt direkt über der Skale bei Y=140 bis Y=148)
+  spr.fillTriangle(156, 140, 164, 140, 160, 148, 0xF800);
+  
+  // Rote Linie durch die Skala von Y=148 bis Y=169
+  spr.drawFastVLine(160, 148, 21, 0xF800);
 
-  // 2. Führungslinien (Ober- und Unterkante direkt an den Strichen)
-  spr.drawFastHLine(0, 110, 320, TH.scale_line); // Obere Führungslinie
-  spr.drawFastHLine(0, 130, 320, TH.scale_line); // Untere Führungslinie
+  // 2. Führungslinien unten am Displayrand
+  spr.drawFastHLine(0, 148, 320, TH.scale_line); // Obere Führungslinie
+  spr.drawFastHLine(0, 169, 320, TH.scale_line); // Untere Führungslinie
 
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text);
@@ -286,32 +287,31 @@ void drawScale(uint32_t freq)
 
       if((freq % 10) == 0)
       {
-        // 10er-Hauptstriche (gehen von Y=110 bis Y=130 durch)
-        spr.drawFastVLine(x, 110, 20, lineColor);
-        spr.drawFastVLine(x + 1, 110, 20, lineColor);
+        // 10er-Hauptstriche (von Y=149 bis Y=168)
+        spr.drawFastVLine(x, 149, 20, lineColor);
+        spr.drawFastVLine(x + 1, 149, 20, lineColor);
 
-        // Frequenzzahlen leicht unterhalb der Skala
+        // Frequenzzahlen unterhalb der Skala
         if(currentMode == FM)
-          spr.drawFloat(freq / 10.0, 1, x, 138, FONT_SMALL);
+          spr.drawFloat(freq / 10.0, 1, x, 178, FONT_SMALL);
         else if(freq >= 100)
-          spr.drawFloat(freq / 100.0, 3, x, 138, FONT_SMALL);
+          spr.drawFloat(freq / 100.0, 3, x, 178, FONT_SMALL);
         else
-          spr.drawNumber(freq * 10, x, 138, FONT_SMALL);
+          spr.drawNumber(freq * 10, x, 178, FONT_SMALL);
       }
       else if((freq % 5) == 0 && (freq % 10) != 0)
       {
-        // 5er-Striche (mittellang, fangen etwas tiefer an, enden bündig bei Y=130)
-        spr.drawFastVLine(x, 118, 12, lineColor);
+        // 5er-Striche (mittellang)
+        spr.drawFastVLine(x, 157, 12, lineColor);
       }
       else
       {
-        // 1er-Striche (kurz, fangen unten bei Y=123 an, enden bündig bei Y=130)
-        spr.drawFastVLine(x, 123, 7, lineColor);
+        // 1er-Striche (kurz)
+        spr.drawFastVLine(x, 162, 7, lineColor);
       }
     }
   }
 }
-
 
 //
 // Draw S-meter
