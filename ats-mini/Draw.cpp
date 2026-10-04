@@ -251,17 +251,17 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 }
 
 //
-// Draw tuner scale Roehrenradiostyle (Richtig positioniert unten)
+// Draw tuner scale Roehrenradiostyle
 //
 void drawScale(uint32_t freq)
 {
-  // 1. Roter Zeiger (Dreieck sitzt direkt über der Skale bei Y=140 bis Y=148)
+  // 1. Roter Zeiger (Dreieck über der Skala)
   spr.fillTriangle(156, 140, 164, 140, 160, 148, 0xF800);
   
-  // Rote Linie durch die Skala von Y=148 bis Y=169
+  // Rote vertikale Linie durch die Skala
   spr.drawFastVLine(160, 148, 21, 0xF800);
 
-  // 2. Führungslinien unten am Displayrand
+  // 2. Führungslinien (Ober- und Unterkante)
   spr.drawFastHLine(0, 148, 320, TH.scale_line); // Obere Führungslinie
   spr.drawFastHLine(0, 169, 320, TH.scale_line); // Untere Führungslinie
 
@@ -287,17 +287,17 @@ void drawScale(uint32_t freq)
 
       if((freq % 10) == 0)
       {
-        // 10er-Hauptstriche (von Y=149 bis Y=168)
+        // 10er-Hauptstriche
         spr.drawFastVLine(x, 149, 20, lineColor);
         spr.drawFastVLine(x + 1, 149, 20, lineColor);
 
-        // Frequenzzahlen unterhalb der Skala
+        // Frequenzzahlen direkt ÜBER der Skala bei Y=140
         if(currentMode == FM)
-          spr.drawFloat(freq / 10.0, 1, x, 178, FONT_SMALL);
+          spr.drawFloat(freq / 10.0, 1, x, 140, FONT_SMALL);
         else if(freq >= 100)
-          spr.drawFloat(freq / 100.0, 3, x, 178, FONT_SMALL);
+          spr.drawFloat(freq / 100.0, 3, x, 140, FONT_SMALL);
         else
-          spr.drawNumber(freq * 10, x, 178, FONT_SMALL);
+          spr.drawNumber(freq * 10, x, 140, FONT_SMALL);
       }
       else if((freq % 5) == 0 && (freq % 10) != 0)
       {
