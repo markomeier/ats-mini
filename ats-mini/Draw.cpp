@@ -251,38 +251,33 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 }
 
 //
-// Draw tuner scale Roehrenradiostyle
+// Draw tuner scale Roehrenradiostyle (gedrehte Ausrichtung)
 //
 void drawScale(uint32_t freq)
 {
-  // Zeiger ganz in Rot (0xF800) für den klassischen Kontrast
-  spr.fillTriangle(156, 120, 160, 130, 164, 120, 0xF800);
-  spr.drawFastVLine(160, 130, 40, 0xF800);
+  // Zeiger in Rot
+  spr.fillTriangle(120, 156, 130, 160, 120, 164, 0xF800);
+  spr.drawFastHLine(130, 160, 40, 0xF800);
 
-  // Zweiliniensystem (Ober- und Unterkante wie bei alten Radios)
-  spr.drawFastHLine(0, 148, 320, TH.scale_line); // Obere Führungslinie
-  spr.drawFastHLine(0, 169, 320, TH.scale_line); // Untere Führungslinie
+  // Zweiliniensystem (Beide Führungsleisten verlaufen senkrecht parallel zur Skala)
+  spr.drawFastVLine(148, 0, 320, TH.scale_line); // Linke Führungslinie
+  spr.drawFastVLine(169, 0, 320, TH.scale_line); // Rechte Führungslinie
 
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text);
 
-  // Extra frequencies to draw outside the screen boundaries
   int16_t slack = 3;
-
-  // Scale offset
   int16_t offset = ((freq % 10) / 10.0 + slack) * 8;
 
-  // Start drawing frequencies from the left
   freq = freq / 10 - 20 - slack;
 
-  // Get band edges
   const Band *band = getCurrentBand();
   uint32_t minFreq = band->minimumFreq / 10;
   uint32_t maxFreq = band->maximumFreq / 10;
 
   for(int i=0 ; i<(slack + 41 + slack) ; i++, freq++)
   {
-    int16_t x = i * 8 - offset;
+    int16_t y = i * 8 - offset; // Y steuert jetzt die Position entlang der Skala
     if(freq >= minFreq && freq <= maxFreq)
     {
       uint16_t lineColor = (i==20) && (!offset || (!(freq%5) && offset==1))?
@@ -290,26 +285,26 @@ void drawScale(uint32_t freq)
 
       if((freq % 10) == 0)
       {
-        // Hauptstriche (Doppelstrich für fettere Optik)
-        spr.drawFastVLine(x, 149, 20, lineColor);
-        spr.drawFastVLine(x + 1, 149, 20, lineColor);
+        // Hauptstriche (Doppelstrich waagerecht von x=149 bis x=168)
+        spr.drawFastHLine(149, y, 20, lineColor);
+        spr.drawFastHLine(149, y + 1, 20, lineColor);
 
         if(currentMode == FM)
-          spr.drawFloat(freq / 10.0, 1, x, 137, FONT_SMALL);
+          spr.drawFloat(freq / 10.0, 1, 137, y, FONT_SMALL);
         else if(freq >= 100)
-          spr.drawFloat(freq / 100.0, 3, x, 137, FONT_SMALL);
+          spr.drawFloat(freq / 100.0, 3, 137, y, FONT_SMALL);
         else
-          spr.drawNumber(freq * 10, x, 137, FONT_SMALL);
+          spr.drawNumber(freq * 10, 137, y, FONT_SMALL);
       }
       else if((freq % 5) == 0 && (freq % 10) != 0)
       {
-        // Mittlere 5er-Striche (halbe Höhe)
-        spr.drawFastVLine(x, 158, 11, lineColor);
+        // Mittlere 5er-Striche (halbe Breite)
+        spr.drawFastHLine(158, y, 11, lineColor);
       }
       else
       {
-        // Kleine 1er-Striche (kurz unten angesetzt)
-        spr.drawFastVLine(x, 163, 6, lineColor);
+        // Kleine 1er-Striche (kurz rechts angesetzt)
+        spr.drawFastHLine(163, y, 6, lineColor);
       }
     }
   }
