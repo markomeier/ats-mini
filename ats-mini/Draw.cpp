@@ -251,16 +251,17 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 }
 
 //
-// Draw tuner scale
+// Draw tuner scale Roehrenradiostyle
 //
 void drawScale(uint32_t freq)
 {
-  // Scale pointer (Zeiger oben & vertikale Linie in Orange)
-  spr.fillTriangle(156, 120, 160, 130, 164, 120, 0xFCA0);
-  spr.drawFastVLine(160, 130, 40, 0xFCA0);
+  // Zeiger ganz in Rot (0xF800) für den klassischen Kontrast
+  spr.fillTriangle(156, 120, 160, 130, 164, 120, 0xF800);
+  spr.drawFastVLine(160, 130, 40, 0xF800);
 
-  // Durchgehende horizontale Grundlinie unten für Retro-Look
-  spr.drawFastHLine(0, 169, 320, TH.scale_line);
+  // Zweiliniensystem (Ober- und Unterkante wie bei alten Radios)
+  spr.drawFastHLine(0, 148, 320, TH.scale_line); // Obere Führungslinie
+  spr.drawFastHLine(0, 169, 320, TH.scale_line); // Untere Führungslinie
 
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text);
@@ -285,29 +286,30 @@ void drawScale(uint32_t freq)
     if(freq >= minFreq && freq <= maxFreq)
     {
       uint16_t lineColor = (i==20) && (!offset || (!(freq%5) && offset==1))?
-        0xFCA0 : TH.scale_line;
+        0xF800 : TH.scale_line;
 
       if((freq % 10) == 0)
       {
-        // Langer Hauptstrich (20px)
+        // Hauptstriche (Doppelstrich für fettere Optik)
         spr.drawFastVLine(x, 149, 20, lineColor);
+        spr.drawFastVLine(x + 1, 149, 20, lineColor);
 
         if(currentMode == FM)
-          spr.drawFloat(freq / 10.0, 1, x, 138, FONT_SMALL);
+          spr.drawFloat(freq / 10.0, 1, x, 137, FONT_SMALL);
         else if(freq >= 100)
-          spr.drawFloat(freq / 100.0, 3, x, 138, FONT_SMALL);
+          spr.drawFloat(freq / 100.0, 3, x, 137, FONT_SMALL);
         else
-          spr.drawNumber(freq * 10, x, 138, FONT_SMALL);
+          spr.drawNumber(freq * 10, x, 137, FONT_SMALL);
       }
       else if((freq % 5) == 0 && (freq % 10) != 0)
       {
-        // Mittlerer 5er-Strich (14px)
-        spr.drawFastVLine(x, 155, 14, lineColor);
+        // Mittlere 5er-Striche (halbe Höhe)
+        spr.drawFastVLine(x, 158, 11, lineColor);
       }
       else
       {
-        // Kurzer 1er-Zwischenstrich (8px)
-        spr.drawFastVLine(x, 161, 8, lineColor);
+        // Kleine 1er-Striche (kurz unten angesetzt)
+        spr.drawFastVLine(x, 163, 6, lineColor);
       }
     }
   }
