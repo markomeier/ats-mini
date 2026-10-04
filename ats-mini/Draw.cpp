@@ -255,15 +255,17 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 //
 void drawScale(uint32_t freq)
 {
-  // Scale pointer
-  spr.fillTriangle(156, 120, 160, 130, 164, 120, TH.scale_pointer);
-  spr.drawLine(160, 130, 160, 169, TH.scale_pointer);
+  // Scale pointer (Zeiger oben & vertikale Linie in Orange)
+  spr.fillTriangle(156, 120, 160, 130, 164, 120, 0xFCA0);
+  spr.drawFastVLine(160, 130, 40, 0xFCA0);
+
+  // Durchgehende horizontale Grundlinie unten für Retro-Look
+  spr.drawFastHLine(0, 169, 320, TH.scale_line);
 
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text);
 
   // Extra frequencies to draw outside the screen boundaries
-  // (ensures frequency numbers don't disappear at the edges)
   int16_t slack = 3;
 
   // Scale offset
@@ -283,27 +285,29 @@ void drawScale(uint32_t freq)
     if(freq >= minFreq && freq <= maxFreq)
     {
       uint16_t lineColor = (i==20) && (!offset || (!(freq%5) && offset==1))?
-        TH.scale_pointer : TH.scale_line;
+        0xFCA0 : TH.scale_line;
 
       if((freq % 10) == 0)
       {
-        spr.drawLine(x, 169, x, 150, lineColor);
-        spr.drawLine(x + 1, 169, x + 1, 150, lineColor);
+        // Langer Hauptstrich (20px)
+        spr.drawFastVLine(x, 149, 20, lineColor);
+
         if(currentMode == FM)
-          spr.drawFloat(freq / 10.0, 1, x, 140, FONT_SMALL);
+          spr.drawFloat(freq / 10.0, 1, x, 138, FONT_SMALL);
         else if(freq >= 100)
-          spr.drawFloat(freq / 100.0, 3, x, 140, FONT_SMALL);
+          spr.drawFloat(freq / 100.0, 3, x, 138, FONT_SMALL);
         else
-          spr.drawNumber(freq * 10, x, 140, FONT_SMALL);
+          spr.drawNumber(freq * 10, x, 138, FONT_SMALL);
       }
       else if((freq % 5) == 0 && (freq % 10) != 0)
       {
-        spr.drawLine(x, 169, x, 155, lineColor);
-        spr.drawLine(x + 1, 169, x + 1, 155, lineColor);
+        // Mittlerer 5er-Strich (14px)
+        spr.drawFastVLine(x, 155, 14, lineColor);
       }
       else
       {
-        spr.drawLine(x, 169, x, 160, lineColor);
+        // Kurzer 1er-Zwischenstrich (8px)
+        spr.drawFastVLine(x, 161, 8, lineColor);
       }
     }
   }
