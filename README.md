@@ -1,7 +1,7 @@
-Dies ist die Übersetzte Originalversion ins Deutsche mit einigen 
-Grafischen Änderungen für bessere Lesbarkeit.
+Dies ist die uebersetzte Originalversion ins Deutsche mit einigen 
+Grafischen Änderungen für bessere Lesbarkeit (Da ich selbst schlecht sehen kann)
 
-Vielen herzlichen Dank dann die Originaleb Entwickler.
+Vielen herzlichen Dank dann die originalen Entwickler.
 
 Infos zu den Entwicklern und Anleitungen siehe unten.
 
