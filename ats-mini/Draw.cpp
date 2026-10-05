@@ -173,7 +173,6 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 {
   // --- AUTOMATISCHE TUNING-ERKENNUNG (Lokale Variablen gegen Scope-Fehler) ---
   static uint32_t lastFreq = 0;
-  static uint32_t lastTuneTime = 0; 
 
   if (freq != lastFreq) {
     lastFreq = freq;
