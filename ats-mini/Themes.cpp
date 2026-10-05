@@ -545,3 +545,11 @@ bool switchThemeEditor(int8_t state)
   themeEditor = state == 0 ? false : (state == 1 ? true : themeEditor);
   return themeEditor;
 }
+ColorTheme* getTheme(uint8_t index)
+{
+  if (index >= getTotalThemes()) {
+    index = 0;
+  }
+  return &theme[index];
+}
+
