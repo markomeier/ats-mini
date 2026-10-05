@@ -130,50 +130,28 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 //
 // Draw radio text
 // -----------------------------------------------------------------------------
-// Globale Variable für den RDS-Lauftext (am Anfang der Datei oder bei den
-// anderen Variablen in Draw.cpp eintragen)
-// -----------------------------------------------------------------------------
-int rtScrollX = 320; // Startet am rechten Bildschirmrand
-
-// -----------------------------------------------------------------------------
-// Draw radio text als flüssiger Scrolltext mit " - " Trenner
-// -----------------------------------------------------------------------------
+//
+// Draw radio text (zweizeilig, perfekt lesbar, ohne Ruckeln)
+//
 void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
   if (!rt || !*rt) return;
 
-  // 1. Alle RDS-Teilzeilen mit " - " zu einem einzigen String verbinden
-  char fullText[128] = "";
-  bool first = true;
+  spr.setTextDatum(TC_DATUM); // Zentriert zeichnen
+  spr.setTextColor(0x07E0);   // Neongrün
 
-  while (*rt) {
-    if (!first) {
-      strcat(fullText, " - ");
-    }
-    strcat(fullText, rt);
-    first = false;
-    rt += strlen(rt) + 1; // Zum nächsten Textsegment im Puffer springen
+  // Wir nutzen Font 2 (mittelgroß) mit einem Zeilenabstand von 15px
+  for(; *rt && (y < ymax) ; y += 15, rt += strlen(rt) + 1)
+  {
+    spr.drawString(rt, 160, y, 2); // '2' ruft die mittlere TFT-Font auf
   }
 
-  // 2. Textausrichtung & Farbe einstellen
-  spr.setTextDatum(TL_DATUM); // Links-Oben für präzises Pixel-Scrolling
-  spr.setTextColor(0x07E0);   // Neongrün (0x07E0)
-
-  // 3. Gesamtbreite des fertigen Textes berechnen
-  int textWidth = spr.textWidth(fullText, FONT_SMALL);
-
-  // 4. Position pro Render-Durchlauf verschieben
-  // Tipp: "- 1" für ganz sanftes Scrollen, "- 2" für etwas schnelleres Tempo
-  rtScrollX -= 2;
-
-  // Wenn der Text komplett links aus dem Bild gewandert ist, wieder von rechts starten
-  if (rtScrollX < -textWidth) {
-    rtScrollX = 320;
+  // Program Info falls vorhanden
+  if((y < ymax) && *getProgramInfo())
+  {
+    spr.drawString(getProgramInfo(), 160, y, 2);
   }
-
-  // 5. Scrolltext zeichnen (auf Höhe y, z. B. y = 140)
-  spr.drawString(fullText, rtScrollX, y, FONT_SMALL);
 }
 
 //
