@@ -224,12 +224,15 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     spr.setTextColor(0x07E0);
     spr.drawString("MHz", ux, uy);
 //
+//
 // Draw frequency
 //
 void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 {
-  // --- AUTOMATISCHE TUNING-ERKENNUNG ---
+  // --- AUTOMATISCHE TUNING-ERKENNUNG (Lokal & sicher) ---
   static uint32_t lastFreq = 0;
+  static uint32_t lastTuneTime = 0; // Lokale statische Variable verhindert Scope-Fehler
+  
   if (freq != lastFreq) {
     lastFreq = freq;
     lastTuneTime = millis(); // Kurbeln erkannt -> Timer triggern!
@@ -237,7 +240,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 
   // Farbwahl: Gelb (0xFFE0) während des Drehens (800ms), sonst Neongrün (0x07E0)
   uint16_t unitColor = (millis() - lastTuneTime < 800) ? 0xFFE0 : 0x07E0;
-  // -------------------------------------
+  // ------------------------------------------------------
 
   struct Line { int x, y, w; };
 
