@@ -171,7 +171,7 @@ void drawRadioText(int y, int ymax)
 //
 void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 {
-  // --- AUTOMATISCHE TUNING-ERKENNUNG (Lokale Variablen gegen Scope-Fehler) ---
+  // --- AUTOMATISCHE TUNING-ERKENNUNG ---
   static uint32_t lastFreq = 0;
 
   if (freq != lastFreq) {
@@ -180,7 +180,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
   }
 
   // Farbwahl: Gelb (0xFFE0) während des Drehens (800ms), sonst Neongrün (0x07E0)
-  uint16_t unitColor = (millis() - lastTuneTime < 800) ? 0xFFE0 : 0x07E0;
+  uint16_t unitColor = ((millis() - lastTuneTime) < 800) ? 0xFFE0 : 0x07E0;
   // --------------------------------------------------------------------------
 
   struct Line { int x, y, w; };
@@ -235,7 +235,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     // FM frequency
     spr.drawFloat(freq/100.00, 2, x, y, FONT_DIGITS);
     spr.setTextDatum(ML_DATUM);
-    spr.setTextColor(unitColor); // Dynamische Farbe (Gelb beim Tunen)
+    spr.setTextColor(unitColor); // Dynamische Farbe (Gelb beim Tunen, sonst Neongrün)
     spr.drawString("MHz", ux, uy);
   }
   else
@@ -263,7 +263,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     }
 
     // SSB/AM frequencies are measured in kHz
-    spr.setTextColor(unitColor); // Dynamische Farbe (Gelb beim Tunen)
+    spr.setTextColor(unitColor); // Dynamische Farbe (Gelb beim Tunen, sonst Neongrün)
     spr.drawString("kHz", ux, uy);
   }
 
@@ -273,7 +273,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     if(selectOn)
     {
       spr.fillRoundRect(li->x + 1, li->y - 1, li->w - 2, 3, 1, TH.freq_hl_sel);
-      spr.fillTriangle(li->x, li->y, li->x + 2, li->y - 2, li->x + 2, li->y + 2, TH.freq_hl_sel);
+      spr.fillTriangle(li->x, li->y, li->x + 2, li->y - 2, li->x + 2, li->y - 2, TH.freq_hl_sel);
       spr.fillTriangle(li->x + li->w - 1, li->y, li->x + li->w - 3, li->y - 2, li->x + li->w - 3, li->y + 2, TH.freq_hl_sel);
     }
     else
@@ -282,6 +282,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     }
   }
 }
+
 
 //
 // Draw tuner scale Roehrenradiostyle
