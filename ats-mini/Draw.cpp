@@ -128,39 +128,26 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 }
 
 //
-// Draw radio text (einzeilig, neongrün & mit Sicherheitsabstand nach links)
+// Draw radio text (Zentriert, blitzschnell & dynamische Schriftgröße)
 //
 void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
   
-  spr.setTextDatum(TL_DATUM); // Linksbuendig ausrichten
+  spr.setTextDatum(TC_DATUM); // Text zentrieren (X = 160)
   spr.setTextColor(0x07E0);   // Neongrün
 
-  // X-Offset: 85px nach rechts rücken, um Skalen/Rand nicht zu überlappen
-  int x_start = 85; 
-
-  // Fall 1: RDS-Text vorhanden
+  // Fall 1: RDS-Text vorhanden -> Groß und deutlich mit Schrift '2' zeichnen
   if (rt && *rt) 
   {
-    char buffer[128] = "";
-    
-    // Segmente mit " - " zu einer einzelnen Zeile zusammenfügen
-    while (*rt) {
-      strlcat(buffer, rt, sizeof(buffer));
-      rt += strlen(rt) + 1;
-      if (*rt) strlcat(buffer, " - ", sizeof(buffer));
-    }
-
-    // Einzeilig in FONT_SMALL zeichnen
-    spr.drawString(buffer, x_start, y, FONT_SMALL);
+    spr.drawString(rt, 160, y, 2);
   } 
-  // Fall 2: Kein RDS-Text vorhanden -> Signalwerte anzeigen
+  // Fall 2: Kein RDS -> Signalwerte kompakt darüber einblenden
   else 
   {
     char sigBuf[32];
     snprintf(sigBuf, sizeof(sigBuf), "S: %d dBuV | SNR: %d dB", rx.getCurrentRSSI(), rx.getCurrentSNR());
-    spr.drawString(sigBuf, x_start, y, FONT_SMALL);
+    spr.drawString(sigBuf, 160, y, FONT_SMALL);
   }
 }
 
