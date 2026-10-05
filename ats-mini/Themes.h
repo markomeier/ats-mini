@@ -71,6 +71,6 @@ int getTotalThemes();
 
 extern ColorTheme theme[];
 bool switchThemeEditor(int8_t state = 2);
-ColorTheme* getTheme(uint8_t index);
+ColorTheme& getTheme(uint8_t index);
 
 #endif // THEMES_H
