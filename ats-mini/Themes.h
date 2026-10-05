@@ -3,26 +3,10 @@
 
 #include <stdint.h>
 
-// 1. Variablen extern deklarieren
+// 1. Extern-Deklaration der Index-Variable
 extern uint8_t themeIdx;
 
-// 2. Vollständige Struct-Definition
-typedef struct __attribute__ ((packed)) {
-    const char *name;
-    uint16_t bg;
-    uint16_t text;
-    uint16_t text_muted;
-    uint16_t text_warn;
-
-    uint16_t smeter_icon;
-    uint16_t smeter_bar;
-    uint16_t smeter_bar_plus;
-    uint16_t smeter_bar_empty;
-
-    uint16_t save_icon;
-    uint1
-
-
+// 2. Struct-Definition
 typedef struct __attribute__ ((packed))
 {
   const char *name;
@@ -85,11 +69,13 @@ typedef struct __attribute__ ((packed))
   uint16_t scan_rssi;
 } ColorTheme;
 
-extern uint8_t themeIdx;
+// 3. Funktionsprototypen
 int getTotalThemes();
-
 extern ColorTheme theme[];
 bool switchThemeEditor(int8_t state = 2);
 ColorTheme& getTheme(uint8_t index);
+
+// 4. Sicheres Makro ganz unten nach allen Deklarationen
+#define TH (getTheme(themeIdx))
 
 #endif // THEMES_H
