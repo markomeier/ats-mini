@@ -69,10 +69,10 @@ void drawLayoutDefault()
   }
   else if(!drawStatus(STATUS_OFFSET_X, STATUS_OFFSET_Y))
   {
-    // 1. RDS-Text (bzw. S: XX dBuV | SNR: XX dB als Fallback) zeichnen
-    drawRadioText(STATUS_OFFSET_Y, STATUS_OFFSET_Y + 25);
+    // 1. RDS / Signalwert genau in die Lücke unter den Sendernamen setzen (Y = 118)
+    drawRadioText(118, 138);
 
-    // 2. Röhrenskala immer zeichnen
+    // 2. Röhrenskala am unteren Rand rendern
     drawScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency);
   }
 }
