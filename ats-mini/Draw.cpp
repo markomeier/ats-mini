@@ -131,26 +131,36 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 // Draw radio text
 // -----------------------------------------------------------------------------
 //
-// Draw radio text (zweizeilig, perfekt lesbar, ohne Ruckeln)
+// Draw radio text (einzeilig, blitzschnell & in Neongrün)
 //
 void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
-  if (!rt || !*rt) return;
-
-  spr.setTextDatum(TC_DATUM); // Zentriert zeichnen
+  
+  spr.setTextDatum(TC_DATUM); // Text zentrieren
   spr.setTextColor(0x07E0);   // Neongrün
 
-  // Wir nutzen Font 2 (mittelgroß) mit einem Zeilenabstand von 15px
-  for(; *rt && (y < ymax) ; y += 15, rt += strlen(rt) + 1)
+  // Fall 1: RDS-Text vorhanden
+  if (rt && *rt) 
   {
-    spr.drawString(rt, 160, y, 2); // '2' ruft die mittlere TFT-Font auf
-  }
+    char buffer[128] = "";
+    
+    // Segmente mit " - " zu einer einzelnen Zeile zusammenfügen
+    while (*rt) {
+      strlcat(buffer, rt, sizeof(buffer));
+      rt += strlen(rt) + 1;
+      if (*rt) strlcat(buffer, " - ", sizeof(buffer));
+    }
 
-  // Program Info falls vorhanden
-  if((y < ymax) && *getProgramInfo())
+    // Einzeilig in Font 2 zeichnen
+    spr.drawString(buffer, 160, y, 2);
+  } 
+  // Fall 2: Kein RDS-Text vorhanden -> Signalwerte anzeigen
+  else 
   {
-    spr.drawString(getProgramInfo(), 160, y, 2);
+    char sigBuf[32];
+    snprintf(sigBuf, sizeof(sigBuf), "S: %d dBuV | SNR: %d dB", getRssi(), getSnr());
+    spr.drawString(sigBuf, 160, y, 2);
   }
 }
 
