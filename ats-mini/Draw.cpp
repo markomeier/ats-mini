@@ -5,8 +5,17 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
-int getRssi();
-int getSnr();
+#include "Radio.h" 
+// Stellt sicher, dass das rx/si4735 Objekt bekannt ist
+
+int getRssi() {
+    return rx.getRssi(); // Ruft den RSSI-Wert vom SI4735 ab
+}
+
+int getSnr() {
+    return rx.getSnr();  // Ruft den SNR-Wert vom SI4735 ab
+}
+
 
 
 uint32_t lastTuneTime = 0;
