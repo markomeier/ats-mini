@@ -56,4 +56,7 @@ void drawLayoutSmeter();
 void drawAbout();
 void drawAboutHelp(uint8_t arrow);
 
+extern uint32_t lastTuneTime;
+
+
 #endif /* DRAW_H */
