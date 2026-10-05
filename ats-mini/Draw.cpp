@@ -411,21 +411,47 @@ void drawScale(uint32_t freq)
 }
 
 //
-// Draw S-meter
+// Draw S-meter mit Peak-Hold (oberster Balken stets rot)
 //
 void drawSMeter(int strength, int x, int y)
 {
+  static int peakBar = 0;
+  static uint32_t lastPeakTime = 0;
+
+  // Peak-Wert aktualisieren
+  if (strength > peakBar) {
+    peakBar = strength;
+    lastPeakTime = millis();
+  } else if (millis() - lastPeakTime > 1200) { 
+    // Nach 1.2s Inaktivität fällt der Peak alle 200ms um einen Balken ab
+    if (peakBar > 0) peakBar--;
+    lastPeakTime = millis() - 1000;
+  }
+
   spr.drawTriangle(x + 1, y + 1, x + 11, y + 1, x + 6, y + 6, 0xFCA0);
   spr.drawLine(x + 6, y + 1, x + 6, y + 14, 0xFCA0);
 
-  for(int i=0 ; i<17 ; i++)
+  for(int i = 0; i < 17; i++)
   {
-    if(i<10 && i<strength)
-      spr.fillRect(15+x + (i*4), 2+y, 2, 12, 0xFCA0);
-    else if(i<strength)
-      spr.fillRect(15+x + (i*4), 2+y, 2, 12, TH.smeter_bar_plus);
+    int barX = 15 + x + (i * 4);
+
+    if (i == peakBar && peakBar > 0)
+    {
+      // Peak-Hold: Der höchste Balken ist IMMER rot (egal ob aktiv oder abgefallen)
+      spr.fillRect(barX, 2 + y, 2, 12, 0xF800);
+    }
+    else if (i < 10 && i < strength)
+    {
+      spr.fillRect(barX, 2 + y, 2, 12, 0xFCA0);
+    }
+    else if (i < strength)
+    {
+      spr.fillRect(barX, 2 + y, 2, 12, TH.smeter_bar_plus);
+    }
     else
-      spr.fillRect(15+x + (i*4), 2+y, 2, 12, TH.smeter_bar_empty);
+    {
+      spr.fillRect(barX, 2 + y, 2, 12, TH.smeter_bar_empty);
+    }
   }
 }
 
