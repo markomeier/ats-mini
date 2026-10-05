@@ -18,7 +18,6 @@ Wenn kein RDS-Text vorhanden ist, werden in der einzeiligen Textansicht automati
 
 🚀 Code-Optimierungen & Refactoring
 Entfernung veralteter Deklarationen:
-Bereinigung unbenutzter Hilfsfunktionen (getRssi(), getSnr()) in Draw.cpp, um Linker-Fehler (undefined reference) zu beheben.
 
 Direkter Empfänger-Zugriff:
 Abfrage der Signalwerte direkt über das globale Receiver-Objekt
