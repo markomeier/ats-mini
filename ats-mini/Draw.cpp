@@ -5,18 +5,6 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
-#include "Radio.h" 
-// Stellt sicher, dass das rx/si4735 Objekt bekannt ist
-
-int getRssi() {
-    return rx.getRssi(); // Ruft den RSSI-Wert vom SI4735 ab
-}
-
-int getSnr() {
-    return rx.getSnr();  // Ruft den SNR-Wert vom SI4735 ab
-}
-
-
 
 uint32_t lastTuneTime = 0;
 
@@ -173,7 +161,7 @@ void drawRadioText(int y, int ymax)
   else 
   {
     char sigBuf[32];
-    snprintf(sigBuf, sizeof(sigBuf), "S: %d dBuV | SNR: %d dB", getRssi(), getSnr());
+    snprintf(sigBuf, sizeof(sigBuf), "S: %d dBuV | SNR: %d dB", rx.getCurrentRSSI(), rx.getCurrentSNR());
     spr.drawString(sigBuf, 160, y, 2);
   }
 }
