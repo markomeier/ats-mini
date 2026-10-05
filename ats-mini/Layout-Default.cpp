@@ -4,6 +4,8 @@
 #include "Menu.h"
 #include "Draw.h"
 
+extern uint32_t lastTuneTime;
+
 void drawLayoutDefault()
 {
   // Draw preferences write request icon
