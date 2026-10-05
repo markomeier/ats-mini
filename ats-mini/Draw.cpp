@@ -134,15 +134,20 @@ void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
 
-  // Draw potentially multi-line radio text
+  // Text zentrieren & Farbe setzen
   spr.setTextDatum(TC_DATUM);
-  spr.setTextColor(0x07E0);
-  for(; *rt && (y<ymax) ; y+=17, rt+=strlen(rt)+1)
+  spr.setTextColor(0x07E0); // Neongrün
+  spr.setTextSize(2);       // Schriftgröße verdoppeln
+
+  // Zeilenabstand von 17 auf 22 erhöht, damit sich die Zeilen nicht überlappen
+  for(; *rt && (y<ymax) ; y+=22, rt+=strlen(rt)+1)
     spr.drawString(rt, 160, y, FONT_SMALL);
 
   // Show program info if we have it and there is enough space
   if((y<ymax) && *getProgramInfo())
     spr.drawString(getProgramInfo(), 160, y, FONT_SMALL);
+
+  spr.setTextSize(1); // WICHTIG: Danach wieder auf Standardgröße 1 zurücksetzen!
 }
 
 //
