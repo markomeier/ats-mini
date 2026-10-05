@@ -43,7 +43,7 @@ ColorTheme theme[] =
     0xD69A, // funit_text
     0xF800, // freq_hl
     0xFFE0, // freq_hl_sel
-    0xD69A, // rds_text
+    0x07E0, // rds_text
     0xFFFF, // scale_text
     0xF800, // scale_pointer
     0xC638, // scale_line
