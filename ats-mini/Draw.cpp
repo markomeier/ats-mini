@@ -6,6 +6,8 @@
 #include "BleMode.h"
 #include "Draw.h"
 
+uint32_t lastTuneTime = 0;
+
 //
 // Draw preferences write indicator
 //
@@ -223,6 +225,76 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     spr.setTextDatum(ML_DATUM);
     spr.setTextColor(0x07E0);
     spr.drawString("MHz", ux, uy);
+//
+// Draw frequency
+//
+void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
+{
+  // --- AUTOMATISCHE TUNING-ERKENNUNG ---
+  static uint32_t lastFreq = 0;
+  if (freq != lastFreq) {
+    lastFreq = freq;
+    lastTuneTime = millis(); // Kurbeln erkannt -> Timer triggern!
+  }
+
+  // Farbwahl: Gelb (0xFFE0) während des Drehens (800ms), sonst Neongrün (0x07E0)
+  uint16_t unitColor = (millis() - lastTuneTime < 800) ? 0xFFE0 : 0x07E0;
+  // -------------------------------------
+
+  struct Line { int x, y, w; };
+
+  const Line hlDigitsFM[] =
+  {
+    { x - 30 - 32 * 0 -  0, y + 28, 27 }, //         .01
+    { x - 30 - 32 * 0 - 16, y + 28, 27 + 16 }, //    .05
+    { x - 30 - 32 * 1 -  0, y + 28, 27 }, //         .10
+    { x - 30 - 32 * 1 - 22, y + 28, 27 + 22 }, //    .50
+    { x - 30 - 32 * 2 - 12, y + 28, 27 }, //        1.00
+    { x - 30 - 32 * 2 - 28, y + 28, 27 + 16 }, //   5.00
+    { x - 30 - 32 * 3 - 12, y + 28, 27 }, //       10.00
+    { x - 30 - 32 * 3 - 28, y + 28, 27 + 16 }, //  50.00
+    { x - 30 - 32 * 4 +  4, y + 28, 11 }, //      100.00
+  };
+
+  const Line hlDigitsAMSSB[] =
+  {
+    { x + 12 + 14 * 2 -  0, y + 28, 12 }, //           .001
+    { x + 12 + 14 * 2 -  7, y + 28, 12 + 7 }, //       .005
+    { x + 12 + 14 * 1 -  0, y + 28, 12 }, //           .010
+    { x + 12 + 14 * 1 -  7, y + 28, 12 + 7 }, //       .050
+    { x + 12 + 14 * 0 -  0, y + 28, 12 }, //           .100
+    { x + 12 + 14 * 0 - 11, y + 28, 12 + 11 }, //      .500
+    { x - 30 - 32 * 0 -  0, y + 28, 27 }, //          1.000
+    { x - 30 - 32 * 0 - 16, y + 28, 27 + 16 }, //     5.000
+    { x - 30 - 32 * 1 -  0, y + 28, 27 }, //         10.000
+    { x - 30 - 32 * 1 - 16, y + 28, 27 + 16 }, //    50.000
+    { x - 30 - 32 * 2 -  0, y + 28, 27 }, //        100.000
+    { x - 30 - 32 * 2 - 16, y + 28, 27 + 16 }, //   500.000
+    { x - 30 - 32 * 3 -  0, y + 28, 27 }, //       1000.000
+    { x - 30 - 32 * 3 - 16, y + 28, 27 + 16 }, //  5000.000
+    { x - 30 - 32 * 4 -  0, y + 28, 27 }, //      10000.000
+  };
+
+  // Top bit specifies if the digit selector is on
+  bool selectOn = hl & 0x80;
+  const struct Line *li;
+
+  // Lower 7 bits specify the selected digit
+  hl &= 0x7F;
+
+  spr.setTextDatum(MR_DATUM);
+  spr.setTextColor(TH.freq_text);
+
+  if(currentMode==FM)
+  {
+    // Determine where underscore is located
+    li = hl<ITEM_COUNT(hlDigitsFM)? &hlDigitsFM[hl] : 0;
+
+    // FM frequency
+    spr.drawFloat(freq/100.00, 2, x, y, FONT_DIGITS);
+    spr.setTextDatum(ML_DATUM);
+    spr.setTextColor(unitColor); // Dynamische Farbe (Gelb beim Tunen)
+    spr.drawString("MHz", ux, uy);
   }
   else
   {
@@ -249,7 +321,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     }
 
     // SSB/AM frequencies are measured in kHz
-    spr.setTextColor(0x07E0);
+    spr.setTextColor(unitColor); // Dynamische Farbe (Gelb beim Tunen)
     spr.drawString("kHz", ux, uy);
   }
 
