@@ -69,10 +69,21 @@ void drawLayoutDefault()
   }
   else if(!drawStatus(STATUS_OFFSET_X, STATUS_OFFSET_Y))
   {
-    // 1. RDS / Signalwert genau in die Lücke unter den Sendernamen setzen (Y = 118)
-    drawRadioText(118, 138);
+    const char *rt = getRadioText();
+    const char *pi = getProgramInfo();
 
-    // 2. Röhrenskala am unteren Rand rendern
-    drawScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency);
+    // 1. Wenn RDS oder ProgramInfo vorhanden ist:
+    // RDS-Text groß anzeigen & Röhrenskala ausblenden
+    if((rt && *rt) || (pi && *pi))
+    {
+      drawRadioText(130, 150);
+    }
+    // 2. Wenn KEIN RDS vorhanden ist:
+    // Signalwerte über der Röhrenskala anzeigen und Skala unten rendern
+    else
+    {
+      drawRadioText(118, 138);
+      drawScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency);
+    }
   }
 }
