@@ -6,6 +6,8 @@
 #include "BleMode.h"
 #include "Draw.h"
 
+uint32_t lastTuneTime = 0;
+
 //
 // Draw preferences write indicator
 //
