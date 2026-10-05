@@ -125,22 +125,20 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
   spr.setTextDatum(TL_DATUM);
   spr.setTextColor(0xFCA0);
   uint16_t mode_width = spr.drawString(mode, x + band_width / 2 + 10, y);
-
- // spr.drawRoundRect(x + band_width / 2 + 8, y + 7, mode_width + 8, 17, 4, TH.mode_border);
 }
 
 //
-// Draw radio text
-// -----------------------------------------------------------------------------
-//
-// Draw radio text (einzeilig, blitzschnell & in Neongrün)
+// Draw radio text (einzeilig, neongrün & mit Sicherheitsabstand nach links)
 //
 void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
   
-  spr.setTextDatum(TC_DATUM); // Text zentrieren
+  spr.setTextDatum(TL_DATUM); // Linksbuendig ausrichten
   spr.setTextColor(0x07E0);   // Neongrün
+
+  // X-Offset: 85px nach rechts rücken, um Skalen/Rand nicht zu überlappen
+  int x_start = 85; 
 
   // Fall 1: RDS-Text vorhanden
   if (rt && *rt) 
@@ -154,15 +152,15 @@ void drawRadioText(int y, int ymax)
       if (*rt) strlcat(buffer, " - ", sizeof(buffer));
     }
 
-    // Einzeilig in Font 2 zeichnen
-    spr.drawString(buffer, 160, y, 2);
+    // Einzeilig in FONT_SMALL zeichnen
+    spr.drawString(buffer, x_start, y, FONT_SMALL);
   } 
   // Fall 2: Kein RDS-Text vorhanden -> Signalwerte anzeigen
   else 
   {
     char sigBuf[32];
     snprintf(sigBuf, sizeof(sigBuf), "S: %d dBuV | SNR: %d dB", rx.getCurrentRSSI(), rx.getCurrentSNR());
-    spr.drawString(sigBuf, 160, y, 2);
+    spr.drawString(sigBuf, x_start, y, FONT_SMALL);
   }
 }
 
@@ -283,13 +281,12 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
   }
 }
 
-
 //
 // Draw tuner scale Roehrenradiostyle
 //
 void drawScale(uint32_t freq)
 {
-  // 1. Roter Kreis oben (Mittelpunkt x=160, y=140, Radius=5 für gute Sichtbarkeit)
+  // 1. Roter Kreis oben (Mittelpunkt x=160, y=140, Radius=5)
   spr.fillCircle(160, 140, 5, 0xF800);
   
   // 2. Dickerer roter Zeigerstrich (2 Pixel breit, von Y=145 bis Y=169)
@@ -408,7 +405,6 @@ void drawStereoIndicator(int x, int y, bool stereo)
     // Split S-meter into two rows
     spr.fillRect(15 + x, 7 + y, 4 * 17 - 2, 2, TH.bg);
   }
-  // Add an "else" statement here to draw a mono indicator
 }
 
 //
@@ -525,4 +521,3 @@ void drawScreen()
 
   spr.pushSprite(0, 0);
 }
-
