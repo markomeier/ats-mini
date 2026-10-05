@@ -77,7 +77,7 @@ bool drawStatus(int x, int y)
   {
     // Draw two lines of operation status
     spr.setTextDatum(TC_DATUM);
-    spr.setTextColor(TH.rds_text);
+    spr.setTextColor(0x07E0);
     spr.drawString(statusLines[0], x, y, FONT_SMALL);
     spr.drawString(statusLines[1], x, y+17, FONT_SMALL);
     return(true);
@@ -129,25 +129,51 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 
 //
 // Draw radio text
-//
+// -----------------------------------------------------------------------------
+// Globale Variable für den RDS-Lauftext (am Anfang der Datei oder bei den
+// anderen Variablen in Draw.cpp eintragen)
+// -----------------------------------------------------------------------------
+int rtScrollX = 320; // Startet am rechten Bildschirmrand
+
+// -----------------------------------------------------------------------------
+// Draw radio text als flüssiger Scrolltext mit " - " Trenner
+// -----------------------------------------------------------------------------
 void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
+  if (!rt || !*rt) return;
 
-  // Text zentrieren & Farbe setzen
-  spr.setTextDatum(TC_DATUM);
-  spr.setTextColor(0x07E0); // Neongrün
-  spr.setTextSize(2);       // Schriftgröße verdoppeln
+  // 1. Alle RDS-Teilzeilen mit " - " zu einem einzigen String verbinden
+  char fullText[128] = "";
+  bool first = true;
 
-  // Zeilenabstand von 17 auf 22 erhöht, damit sich die Zeilen nicht überlappen
-  for(; *rt && (y<ymax) ; y+=22, rt+=strlen(rt)+1)
-    spr.drawString(rt, 160, y, FONT_SMALL);
+  while (*rt) {
+    if (!first) {
+      strcat(fullText, " - ");
+    }
+    strcat(fullText, rt);
+    first = false;
+    rt += strlen(rt) + 1; // Zum nächsten Textsegment im Puffer springen
+  }
 
-  // Show program info if we have it and there is enough space
-  if((y<ymax) && *getProgramInfo())
-    spr.drawString(getProgramInfo(), 160, y, FONT_SMALL);
+  // 2. Textausrichtung & Farbe einstellen
+  spr.setTextDatum(TL_DATUM); // Links-Oben für präzises Pixel-Scrolling
+  spr.setTextColor(0x07E0);   // Neongrün (0x07E0)
 
-  spr.setTextSize(1); // WICHTIG: Danach wieder auf Standardgröße 1 zurücksetzen!
+  // 3. Gesamtbreite des fertigen Textes berechnen
+  int textWidth = spr.textWidth(fullText, FONT_SMALL);
+
+  // 4. Position pro Render-Durchlauf verschieben
+  // Tipp: "- 1" für ganz sanftes Scrollen, "- 2" für etwas schnelleres Tempo
+  rtScrollX -= 2;
+
+  // Wenn der Text komplett links aus dem Bild gewandert ist, wieder von rechts starten
+  if (rtScrollX < -textWidth) {
+    rtScrollX = 320;
+  }
+
+  // 5. Scrolltext zeichnen (auf Höhe y, z. B. y = 140)
+  spr.drawString(fullText, rtScrollX, y, FONT_SMALL);
 }
 
 //
