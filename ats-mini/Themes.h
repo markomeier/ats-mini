@@ -2,7 +2,7 @@
 #define THEMES_H
 
 // This is our current theme
-#define TH (theme[themeIdx])
+#define TH (gettheme[themeIdx])
 
 typedef struct __attribute__ ((packed))
 {
