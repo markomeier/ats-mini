@@ -3,6 +3,8 @@
 #include "Menu.h"
 #include "Draw.h"
 
+extern uint32_t lastTuneTime;
+
 static int getInterpolatedStrength(int rssi)
 {
   const int am_thresholds[] = {1, 2, 3, 4, 10, 16, 22, 28, 34, 44, 54, 64, 74, 84, 94, 95, 96};
