@@ -255,24 +255,30 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 //
 void drawScale(uint32_t freq)
 {
-  // 1. Roter Zeiger (Dreieck über der Skala)
-  spr.fillTriangle(156, 140, 164, 140, 160, 148, 0xF800);
+  // 1. Roter Kreis oben (Mittelpunkt x=160, y=140, Radius=5 für gute Sichtbarkeit)
+  spr.fillCircle(160, 140, 5, 0xF800);
   
-  // Rote vertikale Linie durch die Skala
-  spr.drawFastVLine(160, 148, 21, 0xF800);
+  // 2. Dickerer roter Zeigerstrich (2 Pixel breit, von Y=145 bis Y=169)
+  spr.drawFastVLine(160, 145, 24, 0xF800);
+  spr.drawFastVLine(161, 145, 24, 0xF800);
 
-  // 2. Führungslinien (Ober- und Unterkante)
+  // 3. Führungslinien (Ober- und Unterkante)
   spr.drawFastHLine(0, 148, 320, TH.scale_line); // Obere Führungslinie
   spr.drawFastHLine(0, 169, 320, TH.scale_line); // Untere Führungslinie
 
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text);
 
+  // Extra frequencies to draw outside the screen boundaries
   int16_t slack = 3;
+
+  // Scale offset
   int16_t offset = ((freq % 10) / 10.0 + slack) * 8;
 
+  // Start drawing frequencies from the left
   freq = freq / 10 - 20 - slack;
 
+  // Get band edges
   const Band *band = getCurrentBand();
   uint32_t minFreq = band->minimumFreq / 10;
   uint32_t maxFreq = band->maximumFreq / 10;
@@ -287,11 +293,11 @@ void drawScale(uint32_t freq)
 
       if((freq % 10) == 0)
       {
-        // 10er-Hauptstriche
+        // 10er-Hauptstriche (doppelt für fettere Optik)
         spr.drawFastVLine(x, 149, 20, lineColor);
         spr.drawFastVLine(x + 1, 149, 20, lineColor);
 
-        // Frequenzzahlen direkt ÜBER der Skala bei Y=140
+        // Frequenzzahlen direkt über der Skala
         if(currentMode == FM)
           spr.drawFloat(freq / 10.0, 1, x, 140, FONT_SMALL);
         else if(freq >= 100)
