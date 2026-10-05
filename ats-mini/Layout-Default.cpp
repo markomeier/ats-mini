@@ -56,8 +56,8 @@ void drawLayoutDefault()
   // @@@ FIXME: Frequency display (above) intersects the side bar!
   drawSideBar(currentCmd, MENU_OFFSET_X, MENU_OFFSET_Y, MENU_DELTA_X);
 
-  // Draw S-meter
-  drawSMeter(getStrength(rssi), METER_OFFSET_X, METER_OFFSET_Y);
+  // Draw S-meter mit direktem Signalwert vom RX
+  drawSMeter(rx.getCurrentRSSI(), METER_OFFSET_X, METER_OFFSET_Y);
 
   // Indicate FM pilot detection, unless the audio is pinned to mono
   drawStereoIndicator(METER_OFFSET_X, METER_OFFSET_Y,
@@ -69,10 +69,10 @@ void drawLayoutDefault()
   }
   else if(!drawStatus(STATUS_OFFSET_X, STATUS_OFFSET_Y))
   {
-    // Show radio text if present, else show frequency scale
-    if(*getRadioText() || *getProgramInfo())
-      drawRadioText(STATUS_OFFSET_Y, STATUS_OFFSET_Y + 25);
-    else
-      drawScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency);
+    // 1. RDS-Text (bzw. S: XX dBuV | SNR: XX dB als Fallback) zeichnen
+    drawRadioText(STATUS_OFFSET_Y, STATUS_OFFSET_Y + 25);
+
+    // 2. Röhrenskala immer zeichnen
+    drawScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency);
   }
 }
