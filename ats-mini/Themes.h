@@ -1,8 +1,24 @@
 #ifndef THEMES_H
 #define THEMES_H
 
-// This is our current theme
+#include <stdint.h>
+
+// 1. Erst extern deklarieren
+extern uint8_t themeIdx;
+
+// 2. Struct-Definition
+typedef struct __attribute__ ((packed)) {
+    // ... deine Struct-Felder ...
+} ColorTheme;
+
+// 3. Funktion deklarieren
+ColorTheme& getTheme(uint8_t index);
+
+// 4. Dann erst das Makro definieren
 #define TH (getTheme(themeIdx))
+
+#endif // THEMES_H
+
 
 typedef struct __attribute__ ((packed))
 {
