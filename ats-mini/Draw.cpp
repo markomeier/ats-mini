@@ -5,6 +5,9 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
+int getRssi();
+int getSnr();
+
 
 uint32_t lastTuneTime = 0;
 
