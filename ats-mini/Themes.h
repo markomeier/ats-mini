@@ -55,7 +55,7 @@ typedef struct __attribute__ ((packed))
   uint16_t freq_hl;
   uint16_t freq_hl_sel;
 
-  uint16_t 0x07E0;
+  uint16_t rds_text;
 
   uint16_t scale_text;
   uint16_t scale_pointer;
