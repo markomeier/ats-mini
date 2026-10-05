@@ -4,18 +4,22 @@ Neuestes Release: v1.01 mit folgenden Änderungen:
 📻 Skala & Tuning-Optik (Klassischer Röhrenradio-Stil)
 Design-Anpassungen:
 Roter Indikator-Kreis (x=160, y=140) und prägnanter roter Zeigerstrich (2\text{ px} breit) im klassischen Röhrenradio-Look.
+
 Horizontale Führungslinien an der Skalen-Ober- und Unterkante.
 Hervorgehobene, doppelte 10\text{er}-Hauptstriche sowie abgestufte 5\text{er}- und 1\text{er}-Markierungen für bessere Lesbarkeit.
 Dynamisches Frequenz-Feedback:
 Die Frequenzeinheit (MHz / kHz) wechselt beim Drehen des Abstimmknopfs (Tuning) automatisch für 800\text{ ms} auf Gelb und schaltet danach wieder auf Neongrün um.
+
 📊 S-Meter & Signal-Anzeige
 Peak-Hold Funktion:
 Integrierter Peak-Hold-Effekt im S-Meter: Der höchste gemessene Signalbalken wird stets in Rot gehalten und fällt nach 1{,}2\text{ s} schrittweise ab.
 Signalwerte als RDS-Fallback:
 Wenn kein RDS-Text vorhanden ist, werden in der einzeiligen Textansicht automatisch die aktuellen Empfangswerte in Neongrün dargestellt (S: XX dBuV | SNR: XX dB).
+
 🚀 Code-Optimierungen & Refactoring
 Entfernung veralteter Deklarationen:
 Bereinigung unbenutzter Hilfsfunktionen (getRssi(), getSnr()) in Draw.cpp, um Linker-Fehler (undefined reference) zu beheben.
+
 Direkter Empfänger-Zugriff:
 Abfrage der Signalwerte direkt über das globale Receiver-Objekt
 
