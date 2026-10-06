@@ -345,21 +345,28 @@ void drawScale(uint32_t freq)
 }
 
 //
-// Draw S-meter mit Peak-Hold (oberster Balken stets rot)
+// Draw S-meter mit flüssigem Peak-Hold Abfalleffekt
 //
 void drawSMeter(int strength, int x, int y)
 {
   static int peakBar = 0;
   static uint32_t lastPeakTime = 0;
+  static uint32_t lastDecayTime = 0;
 
-  // Peak-Wert aktualisieren
-  if (strength > peakBar) {
+  uint32_t now = millis();
+
+  // Neuer Höchstwert erreicht -> Peak anheben & Timer zurücksetzen
+  if (strength >= peakBar) {
     peakBar = strength;
-    lastPeakTime = millis();
-  } else if (millis() - lastPeakTime > 1200) { 
-    // Nach 1.2s Inaktivität fällt der Peak alle 200ms um einen Balken ab
-    if (peakBar > 0) peakBar--;
-    lastPeakTime = millis() - 1000;
+    lastPeakTime = now;
+    lastDecayTime = now;
+  } 
+  // Nach 1.2 Sekunden Inaktivität schrittweise alle 150ms abfallen lassen
+  else if (now - lastPeakTime > 1200) {
+    if (now - lastDecayTime > 150) {
+      if (peakBar > 0) peakBar--;
+      lastDecayTime = now;
+    }
   }
 
   spr.drawTriangle(x + 1, y + 1, x + 11, y + 1, x + 6, y + 6, 0xFCA0);
@@ -371,7 +378,7 @@ void drawSMeter(int strength, int x, int y)
 
     if (i == peakBar && peakBar > 0)
     {
-      // Peak-Hold: Der höchste Balken ist IMMER rot (egal ob aktiv oder abgefallen)
+      // Peak-Hold: Der aktuell gehaltene/abfallende Peak-Balken ist ROTE ZIEL-MARKE
       spr.fillRect(barX, 2 + y, 2, 12, 0xF800);
     }
     else if (i < 10 && i < strength)
