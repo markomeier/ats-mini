@@ -1,4 +1,4 @@
-name: Build Firmware
+Name: Build Firmware
 
 on:
   workflow_dispatch:
@@ -10,12 +10,13 @@ on:
 
 jobs:
   build:
-    name: build ${{ matrix.board.artifact-suffix }}
+    name: build ${{ matrix.board.artifact-suffix }}-${{ matrix.lang }}
     runs-on: ubuntu-latest
     permissions: {}
     strategy:
       fail-fast: true
       matrix:
+        lang: [de, en]
         board:
           - profile: esp32s3-ospi
             # If you change this line, change it in sketch.yaml as well
@@ -55,6 +56,14 @@ jobs:
           fetch-tags: true
           ref: "${{ github.event.inputs.revision || github.ref }}"
 
+      - name: Prepare Menu for Selected Language
+        run: |
+          if [ "${{ matrix.lang }}" = "de" ]; then
+            cp ats-mini/Menu_german.cpp ats-mini/Menu.cpp
+          else
+            cp ats-mini/Menu_english.cpp ats-mini/Menu.cpp
+          fi
+
       - name: Get version slug
         id: slug
         run: |
@@ -81,7 +90,7 @@ jobs:
         with:
           if-no-files-found: error
           path: sketches-reports
-          name: sketches-report-${{ matrix.board.artifact-suffix }}
+          name: sketches-report-${{ matrix.board.artifact-suffix }}-${{ matrix.lang }}
 
       - name: Install uv and python
         uses: astral-sh/setup-uv@v8.1.0
@@ -101,17 +110,17 @@ jobs:
 
       - name: Prepare compiled artifact
         run: |
-          mkdir -p artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}
-          cp ats-mini/build/esp32.esp32.esp32s3/ats-mini.ino.bin artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}-ota.bin
-          cp ats-mini/build/esp32.esp32.esp32s3/boot_app0.bin artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}/
-          mv ats-mini/build/esp32.esp32.esp32s3/*.ino.bin ats-mini/build/esp32.esp32.esp32s3/*.ino.*.bin artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}/
-          cp CHANGELOG.md artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}/
+          mkdir -p artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}-${{ matrix.lang }}
+          cp ats-mini/build/esp32.esp32.esp32s3/ats-mini.ino.bin artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}-${{ matrix.lang }}-ota.bin
+          cp ats-mini/build/esp32.esp32.esp32s3/boot_app0.bin artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}-${{ matrix.lang }}/
+          mv ats-mini/build/esp32.esp32.esp32s3/*.ino.bin ats-mini/build/esp32.esp32.esp32s3/*.ino.*.bin artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}-${{ matrix.lang }}/
+          cp CHANGELOG.md artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}-${{ matrix.lang }}/
 
       - name: Upload compiled artifact
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: error
-          name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}
+          name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}-${{ matrix.lang }}
           path: |
             artifact
             !artifact/*-ota.bin
@@ -120,7 +129,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: error
-          path: artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}-ota.bin
+          path: artifact/ats-mini-${{ steps.slug.outputs.slug }}-${{ matrix.board.artifact-suffix }}-${{ matrix.lang }}-ota.bin
           archive: false
 
   release:
@@ -145,7 +154,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           SLUG: ${{ needs.build.outputs.slug }}
         run: >-
-          python -c 'import os,re; t=open(f"""artifact/ats-mini-{os.environ["SLUG"]}-ospi/CHANGELOG.md""").read(); r=re.search(f"""(^## {os.environ["SLUG"][1:].replace(".", "\\.")} .*?)(?=^## \\d|\\Z)""", t, re.MULTILINE | re.DOTALL); print(r.group(0) if r else "")' |
+          python -c 'import os,re; t=open(f"""artifact/ats-mini-{os.environ["SLUG"]}-ospi-de/CHANGELOG.md""").read(); r=re.search(f"""(^## {os.environ["SLUG"][1:].replace(".", "\\.")} .*?)(?=^## \\d|\\Z)""", t, re.MULTILINE | re.DOTALL); print(r.group(0) if r else "")' |
           gh release create "$SLUG" --repo '${{ github.repository }}' --notes-file -
       - name: Upload release artifacts
         env:
@@ -157,5 +166,4 @@ jobs:
         run: |
           # shellcheck disable=SC2086
           gh release upload "$SLUG" $FILENAMES --repo '${{ github.repository }}' --clobber
-
           
