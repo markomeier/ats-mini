@@ -143,16 +143,17 @@ void drawRadioText(int y, int ymax)
     spr.setTextDatum(TC_DATUM);
     spr.drawString(rt, 160, y, 4);
   } 
-  // Fall 2: Kein RDS -> Signalwerte EBENFALLS in Font 4 gross zeichnen!
+  // Fall 2: Kein RDS -> Signalwerte in Font 4 (kompakt formatiert für 2-stellige Werte)
   else 
   {
     spr.setTextDatum(TL_DATUM);
 
     char sigBuf[32];
-    snprintf(sigBuf, sizeof(sigBuf), "S:%d dBu | SNR:%d dB", rx.getCurrentRSSI(), rx.getCurrentSNR());
+    // Straffes Format, damit selbst bei S:99 | SNR:30 dB nichts rechts abgeschnitten wird
+    snprintf(sigBuf, sizeof(sigBuf), "S:%d | SNR:%d dB", rx.getCurrentRSSI(), rx.getCurrentSNR());
     
-    // Font 4 verwenden (exakt gleiche Schriftart wie beim RDS-Text)
-    // X = 90 schiebt die grosse Schrift passgenau rechts neben die gelbe Box
+    // Font 4 verwenden (groß & gut lesbar)
+    // X = 90 schiebt den Text passgenau rechts neben die gelbe Box
     spr.drawString(sigBuf, 90, y - 6, 4);
   }
 }
