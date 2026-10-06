@@ -128,7 +128,7 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 }
 
 //
-// Draw radio text (Zentriert, blitzschnell & dynamische Schriftgröße)
+// Draw radio text (Zentriert, blitzschnell & Font 4 fuer grosse Schrift)
 //
 void drawRadioText(int y, int ymax)
 {
@@ -137,10 +137,10 @@ void drawRadioText(int y, int ymax)
   spr.setTextDatum(TC_DATUM); // Text zentrieren (X = 160)
   spr.setTextColor(0x07E0);   // Neongrün
 
-  // Fall 1: RDS-Text vorhanden -> Groß und deutlich mit Schrift '2' zeichnen
+  // Fall 1: RDS-Text vorhanden -> Mit Font 4 gross und deutlich zeichnen
   if (rt && *rt) 
   {
-    spr.drawString(rt, 160, y, 2);
+    spr.drawString(rt, 160, y, 4);
   } 
   // Fall 2: Kein RDS -> Signalwerte kompakt darüber einblenden
   else 
