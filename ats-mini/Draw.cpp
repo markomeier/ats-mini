@@ -128,26 +128,30 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 }
 
 //
-// Draw radio text (Zentriert, blitzschnell & Font 4 fuer grosse Schrift)
+// Draw radio text
 //
 void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
   
-  spr.setTextDatum(TC_DATUM); // Text zentrieren (X = 160)
-  spr.setTextColor(0x07E0);   // Neongrün
-
-  // Fall 1: RDS-Text vorhanden -> Mit Font 4 gross und deutlich zeichnen
+  // Fall 1: RDS-Text vorhanden -> Zentriert mit Font 4 gross zeichnen
   if (rt && *rt) 
   {
+    spr.setTextDatum(TC_DATUM);
+    spr.setTextColor(0x07E0);   // Neongrün
     spr.drawString(rt, 160, y, 4);
   } 
-  // Fall 2: Kein RDS -> Signalwerte kompakt darüber einblenden
+  // Fall 2: Kein RDS -> Linksbündig bei X = 110 mit Font 3 (gross & gut lesbar)
   else 
   {
+    spr.setTextDatum(TL_DATUM);
+    spr.setTextColor(0x07E0);   // Neongrün
+
     char sigBuf[32];
     snprintf(sigBuf, sizeof(sigBuf), "S: %d dBuV | SNR: %d dB", rx.getCurrentRSSI(), rx.getCurrentSNR());
-    spr.drawString(sigBuf, 160, y, FONT_SMALL);
+    
+    // Font 3 verwenden & X = 110 wählen, um die gelbe Menübox zu schützen
+    spr.drawString(sigBuf, 110, y, 3);
   }
 }
 
