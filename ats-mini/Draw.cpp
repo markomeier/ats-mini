@@ -20,7 +20,7 @@ void drawSaveIndicator(int x, int y)
     spr.fillTriangle(x+1, y+7, x+7, y+7, x+4, y+10, TH.save_icon);
     spr.drawLine(x, y+12, x, y+13, TH.save_icon);
     spr.drawLine(x, y+13, x+8, y+13, TH.save_icon);
-    spr.drawLine(x, y+13, x+8, y+12, TH.save_icon);
+    spr.drawLine(x+8, y+13, x+8, y+12, TH.save_icon);
   }
 }
 
@@ -139,26 +139,26 @@ void drawRadioText(int y, int ymax)
   {
     spr.setTextDatum(TC_DATUM);
     spr.setTextColor(0x07E0);   // Neongrün
-    spr.setTextSize(1.0);       // Standard-Skalierung
+    spr.setTextSize(1);        // Standard-Grösse
     spr.drawString(rt, 160, y, 4);
   } 
-  // Fall 2: Kein RDS -> Linksbündig bei X = 108 mit vergrössertem FONT_SMALL
+  // Fall 2: Kein RDS -> ECHT vergrössert (setTextSize 2) & sicher rechts neben der Menübox!
   else 
   {
     spr.setTextDatum(TL_DATUM);
     spr.setTextColor(0x07E0);   // Neongrün
 
     char sigBuf[32];
-    snprintf(sigBuf, sizeof(sigBuf), "S:%d dBu | SNR:%d dB", rx.getCurrentRSSI(), rx.getCurrentSNR());
+    snprintf(sigBuf, sizeof(sigBuf), "S:%d|SNR:%d", rx.getCurrentRSSI(), rx.getCurrentSNR());
     
-    // Text um ~30% vergrössern (deutlich besser lesbar als Standard)
-    spr.setTextSize(1.3);
+    // Verdoppelte Schriftgrösse
+    spr.setTextSize(2);
     
-    // Fester Startpunkt X = 108 schützt den gelben Menürahmen links
-    spr.drawString(sigBuf, 108, y - 2, FONT_SMALL);
+    // Startpunkt X = 122 liegt garantiert rechts ausserhalb des gelben Kastens
+    spr.drawString(sigBuf, 122, y - 5, FONT_SMALL);
 
-    // Skalierung sicherheitshalber wieder auf 1.0 zurücksetzen
-    spr.setTextSize(1.0);
+    // Skalierung sicherheitshalber wieder auf 1 zurücksetzen
+    spr.setTextSize(1);
   }
 }
 
