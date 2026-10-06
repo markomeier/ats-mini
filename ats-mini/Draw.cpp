@@ -128,37 +128,32 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 }
 
 //
-// Draw radio text
+// Draw radio text (RDS und Signalwerte in grosser Schrift Font 4)
 //
 void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
   
+  spr.setTextColor(0x07E0);   // Neongrün
+  spr.setTextSize(1.0);       // Standard-Skalierung für saubere Pixel
+
   // Fall 1: RDS-Text vorhanden -> Zentriert mit Font 4 gross zeichnen
   if (rt && *rt) 
   {
     spr.setTextDatum(TC_DATUM);
-    spr.setTextColor(0x07E0);   // Neongrün
-    spr.setTextSize(1);        // Standard-Grösse
     spr.drawString(rt, 160, y, 4);
   } 
-  // Fall 2: Kein RDS -> ECHT vergrössert (setTextSize 2) & sicher rechts neben der Menübox!
+  // Fall 2: Kein RDS -> Signalwerte EBENFALLS in Font 4 gross zeichnen!
   else 
   {
     spr.setTextDatum(TL_DATUM);
-    spr.setTextColor(0x07E0);   // Neongrün
 
     char sigBuf[32];
-    snprintf(sigBuf, sizeof(sigBuf), "S:%d|SNR:%d", rx.getCurrentRSSI(), rx.getCurrentSNR());
+    snprintf(sigBuf, sizeof(sigBuf), "S:%d dBu | SNR:%d dB", rx.getCurrentRSSI(), rx.getCurrentSNR());
     
-    // Verdoppelte Schriftgrösse
-    spr.setTextSize(2);
-    
-    // Startpunkt X = 122 liegt garantiert rechts ausserhalb des gelben Kastens
-    spr.drawString(sigBuf, 122, y - 5, FONT_SMALL);
-
-    // Skalierung sicherheitshalber wieder auf 1 zurücksetzen
-    spr.setTextSize(1);
+    // Font 4 verwenden (exakt gleiche Schriftart wie beim RDS-Text)
+    // X = 90 schiebt die grosse Schrift passgenau rechts neben die gelbe Box
+    spr.drawString(sigBuf, 90, y - 6, 4);
   }
 }
 
