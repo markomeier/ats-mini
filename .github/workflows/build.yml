@@ -19,7 +19,6 @@ jobs:
         lang: [de, en]
         board:
           - profile: esp32s3-ospi
-            # If you change this line, change it in sketch.yaml as well
             fqbn: esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=8M,PSRAM=opi,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=custom,DebugLevel=none
             artifact-suffix: ospi
             cli-compile-flags: |
@@ -27,7 +26,6 @@ jobs:
               - esp32s3-ospi
               - --export-binaries
           - profile: esp32s3-qspi
-            # If you change this line, change it in sketch.yaml as well
             fqbn: esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=8M,PSRAM=enabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=custom,DebugLevel=none
             artifact-suffix: qspi
             cli-compile-flags: |
@@ -35,7 +33,6 @@ jobs:
               - esp32s3-qspi
               - --export-binaries
           - profile: esp32s3-ospi
-            # If you change this line, change it in sketch.yaml as well
             fqbn: esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=8M,PSRAM=opi,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=custom,DebugLevel=none
             artifact-suffix: lilygo-t-embed
             cli-compile-flags: |
@@ -59,9 +56,9 @@ jobs:
       - name: Prepare Menu for Selected Language
         run: |
           if [ "${{ matrix.lang }}" = "de" ]; then
-            cp ats-mini/Menu_german.cpp ats-mini/Menu.cpp
+            cp ats-mini/Menu_german.cpp.src ats-mini/Menu.cpp
           else
-            cp ats-mini/Menu_english.cpp ats-mini/Menu.cpp
+            cp ats-mini/Menu_english.cpp.src ats-mini/Menu.cpp
           fi
 
       - name: Get version slug
@@ -81,7 +78,6 @@ jobs:
             - ats-mini
           fqbn: ${{ matrix.board.fqbn }}
           cli-compile-flags: ${{ matrix.board.cli-compile-flags }}
-          # Disabled to prevent building artifact for a previous commit
           enable-deltas-report: false
           enable-warnings-report: true
 
