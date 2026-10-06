@@ -33,7 +33,7 @@ Band bands[] =
 {
   {"UKW",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 2, 0, 0, 0},
   // All band. LW, MW and SW (from 150kHz to 30MHz)
-  {"ALLE",  SW_BAND_TYPE, AM,    150, 30000, 15000, 1, 4, 0, 0},
+  {"ALL",  SW_BAND_TYPE, AM,    150, 30000, 15000, 1, 4, 0, 0},
   {"11M",  SW_BAND_TYPE, AM,  25600, 26100, 25850, 1, 4, 0, 0},
   {"13M",  SW_BAND_TYPE, AM,  21500, 21900, 21650, 1, 4, 0, 0},
   {"15M",  SW_BAND_TYPE, AM,  18900, 19100, 18950, 1, 4, 0, 0},
@@ -96,19 +96,19 @@ int8_t menuIdx = MENU_VOLUME;
 
 static const char *menu[] =
 {
-  "AM-SSB",
-  "BAENDER",
-  "LAUTST.",
-  "STEPS",
-  "SUCHE",
-  "SCANNEN",
-  "SPEICHER",
-  "RAUSCHE",
-  "BANDBR.",
+  "Mode",
+  "Bands",
+  "Volume",
+  "Steps",
+  "Seek",
+  "Scan",
+  "Memory",
+  "Squwlch",
+  "Bandwith",
   "AGC/ATTN",
   "AVC",
-  "SOFT-MUTE",
-  "EINSTELL.",
+  "SoftMute",
+  "Settings",
 };
 
 //
@@ -145,27 +145,27 @@ int8_t settingsIdx = MENU_BRIGHTNESS;
 
 static const char *settings[] =
 {
-  "HELLIGKEIT",
-  "DATUM-ZEIT",
-  "UTC OFFSET",
-  "SCHLAF",
-  "SCHLAFMODUS",
-  "THEMEN",
-  "UI DESIGN",
-  "ZOOM-MENUE",
+  "Brightness",
+  "Date/Time",
+  "UTC Offset",
+  "Sleep",
+  "Sleep Mode",
+  "Theme",
+  "UI Layout",
+  "Zoom Menu",
   "Scroll Dir.",
   "RDS",
-  "UKW STEREO",
-  "UKW REGION",
-  "KALIBRIEREN",
+  "FM Stereo",
+  "FM Region",
+  "Calibration",
   "DSP Patches",
-  "LADE EiBi",
+  "Load EiBi",
   "Update FW",
   "USB Port",
   "TCP Port",
   "Bluetooth",
-  "WLAN",
-  "UEBER",
+  "Wi-Fi",
+  "About",
 };
 
 //
