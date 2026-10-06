@@ -1,4 +1,4 @@
-Name: Build Firmware
+name: Build Firmware
 
 on:
   workflow_dispatch:
@@ -154,7 +154,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           SLUG: ${{ needs.build.outputs.slug }}
         run: >-
-          python -c 'import os,re; t=open(f"""artifact/ats-mini-{os.environ["SLUG"]}-ospi-de/CHANGELOG.md""").read(); r=re.search(f"""(^## {os.environ["SLUG"][1:].replace(".", "\\.")} .*?)(?=^## \\d|\\Z)""", t, re.MULTILINE | re.DOTALL); print(r.group(0) if r else "")' |
+          python -c 'import os,re,glob; p=glob.glob(f"artifact/ats-mini-{os.environ[\"SLUG\"]}-ospi-*/CHANGELOG.md")[0]; t=open(p).read(); r=re.search(f"(^## {os.environ[\"SLUG\"][1:].replace(\".\", \"\\\\.\")} .*?)(?=^## \\\\d|\\\\Z)", t, re.MULTILINE | re.DOTALL); print(r.group(0) if r else "")' |
           gh release create "$SLUG" --repo '${{ github.repository }}' --notes-file -
       - name: Upload release artifacts
         env:
