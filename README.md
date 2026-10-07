@@ -1,4 +1,4 @@
-Neuestes Release: v1.01 mit folgenden Änderungen:
+Neuestes Release: v1.03 mit folgenden Änderungen:
 
 🛠️ Changelog / Versionshinweise
 📻 Skala & Tuning-Optik (Klassischer Röhrenradio-Stil)
@@ -17,6 +17,8 @@ Signalwerte als RDS-Fallback:
 Wenn kein RDS-Text vorhanden ist, werden in der einzeiligen Textansicht automatisch die aktuellen Empfangswerte in Neongrün dargestellt (S: XX dBuV | SNR: XX dB).
 
 🚀 Code-Optimierungen & Refactoring
+Aktuellste Updates manuell von der Original Firmware übernommen.
+
 Entfernung veralteter Deklarationen:
 
 Direkter Empfänger-Zugriff:
