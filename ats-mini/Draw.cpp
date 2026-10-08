@@ -19,8 +19,8 @@ uint32_t lastTuneTime = 0;
 // Skalierung 1.25 für gute Lesbarkeit & richtige Positionierung
 //
 void updateStereoIndication(bool isStereo) {
-    int xPos = 225;     // Position leicht angepasst
-    int yPos = 50;      
+    int xPos = 225;     // Position horizontal beibehalten
+    int yPos = 65;      // Dezent nach unten versetzt (vorher 50)
     float zoom = 1.25;  // Zoom 1.25 wie gewünscht
 
     int totalPixels = AUDIO_ICON_WIDTH * AUDIO_ICON_HEIGHT;
@@ -53,9 +53,12 @@ void updateStereoIndication(bool isStereo) {
 }
 
 //
-// Block-Equalizer Animation (aus dem Video bei Sek. 9-10)
+// Block-Equalizer Animation (Löscht die Skala vollständig & bewegt sich flüssig)
 //
 void drawBlockEqualizer(int x, int y, int width, int height) {
+    // 1. Wischt den gesamten Skalenbereich (ab y=125 bis y=173) inklusive Zahlen und Zeiger komplett weg
+    spr.fillRect(0, 125, 320, 48, TH.bg);
+
     const int numBands = 16;        
     const int blocksPerBand = 6;    
     
@@ -74,13 +77,18 @@ void drawBlockEqualizer(int x, int y, int width, int height) {
     int currentSNR = rx.getCurrentSNR();
     int currentRSSI = rx.getCurrentRSSI();
     
+    // Basis-Pegel basierend auf Empfangssignal
     int baseLevel = map(constrain(currentSNR, 0, 30), 0, 30, 1, blocksPerBand);
+
+    // Zeitstempel für eine flüssige Animation (~60ms Bildwechsel)
+    uint32_t animFrame = millis() / 60;
 
     for (int b = 0; b < numBands; b++) {
         int posX = x + b * (bandWidth + 2);
 
-        int variation = random(-1, 2);
-        int activeBlocks = constrain(baseLevel + variation, 0, blocksPerBand);
+        // Dynamische Sinus-Welle + Signalpegel für geschmeidigen EQ-Effekt
+        int animOffset = (sin((animFrame + b * 2) * 0.5) + 1.0) * 1.5;
+        int activeBlocks = constrain(baseLevel + animOffset - 1, 0, blocksPerBand);
 
         if (currentRSSI < 10) activeBlocks = 0;
 
@@ -90,7 +98,7 @@ void drawBlockEqualizer(int x, int y, int width, int height) {
             if (i < activeBlocks) {
                 spr.fillRect(posX, posY, bandWidth, blockHeight, blockColors[i]);
             } else {
-                spr.fillRect(posX, posY, bandWidth, blockHeight, 0x18E3);
+                spr.fillRect(posX, posY, bandWidth, blockHeight, 0x18E3); // Inaktiver Block
             }
         }
     }
@@ -107,7 +115,7 @@ void drawSaveIndicator(int x, int y)
     spr.fillTriangle(x+1, y+7, x+7, y+7, x+4, y+10, TH.save_icon);
     spr.drawLine(x, y+12, x, y+13, TH.save_icon);
     spr.drawLine(x, y+13, x+8, y+13, TH.save_icon);
-    spr.drawLine(x+8, y+13, x+8, y+12, TH.save_icon);
+    spr.drawLine(x+8, y+12, x+8, y+12, TH.save_icon);
   }
 }
 
@@ -568,8 +576,8 @@ void drawScreen()
   } 
   else 
   {
-   drawScale(currentFrequency);
-}
+    drawScale(currentFrequency);
+  }
 
   spr.pushSprite(0, 0);
 }
