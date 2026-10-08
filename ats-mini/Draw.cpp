@@ -12,20 +12,40 @@ uint32_t lastTuneTime = 0;
 
 //
 // Hilfsfunktion: Zeichnet das La Linea Mono/Stereo Icon auf das Sprite
-// mit 150% Software-Zoom (1.5) und angepasster Position
+// Färbt rote Bestandteile (Schrift & Linie) automatisch in Neongrün (0x07E0) um
 //
 void updateStereoIndication(bool isStereo) {
-    int xPos = 242;     // Leicht nach rechts für optimalen Randabstand
-    int yPos = 52;      // Deutlich höher, damit es frei über der Skala schwebt
-    float zoom = 1.5;   // 150% Vergrößerung
+    int xPos = 242; 
+    int yPos = 52;      
+    float zoom = 1.5;  
+
+    int totalPixels = AUDIO_ICON_WIDTH * AUDIO_ICON_HEIGHT;
+    static uint16_t colored_icon[AUDIO_ICON_WIDTH * AUDIO_ICON_HEIGHT];
+
+    // Quellbild auswählen
+    const uint16_t* src_icon = isStereo ? img_stereo : img_mono;
+
+    // Pixel durchgehen und Rot durch Neongrün (0x07E0) ersetzen
+    for (int i = 0; i < totalPixels; i++) {
+        uint16_t pixel = src_icon[i];
+
+        // Erkennung von Rot-Tönen im RGB565-Format (hoher Rot-Anteil, wenig Grün/Blau)
+        // Bei aktiviertem SwapBytes entspricht das Rot-Muster meist Werten > 0xF000 oder starkem Rot-Kanal
+        uint8_t r = (pixel >> 11) & 0x1F;
+        uint8_t g = (pixel >> 5) & 0x3F;
+        uint8_t b = pixel & 0x1F;
+
+        if (r > 15 && g < 15 && b < 15) {
+            colored_icon[i] = 0x07E0; // Neongrün
+        } else {
+            colored_icon[i] = pixel;  // Originalfarbe beibehalten (z. B. schwarzer/transparenter Hintergrund)
+        }
+    }
 
     spr.setSwapBytes(true);
 
-    if (isStereo) {
-        spr.pushImageRotateZoom(xPos, yPos, 0, 0, 0, zoom, zoom, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_stereo);
-    } else {
-        spr.pushImageRotateZoom(xPos, yPos, 0, 0, 0, zoom, zoom, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_mono);
-    }
+    // Das umgefärbte Icon zeichnen
+    spr.pushImageRotateZoom(xPos, yPos, 0, 0, 0, zoom, zoom, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, colored_icon);
 
     spr.setSwapBytes(false);
 }
