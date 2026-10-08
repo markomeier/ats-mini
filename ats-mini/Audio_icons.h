@@ -71,10 +71,6 @@ const uint16_t img_stereo [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 3712)
-const int img_allArray_LEN = 1;
-const uint16_t* img_allArray[1] = {
-	img_stereo
-};
 
 
 // Mono-Icon (La Linea Mono)
@@ -140,9 +136,5 @@ const uint16_t img_mono [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 3712)
-const int img_allArray_LEN = 1;
-const uint16_t* img_allArray[1] = {
-	img_mono
-};
 
 #endif
