@@ -1,3 +1,6 @@
+// UKW Senderlogos
+// 1Live
+
 // '1live', 48x48px
 const uint16_t logo_1live [] = {
 	0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 
@@ -151,3 +154,5 @@ const int logo_allArray_LEN = 1;
 const uint16_t* logo_allArray[1] = {
 	logo_1live
 };
+
+//
