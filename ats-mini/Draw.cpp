@@ -5,8 +5,26 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
+#include "Audio_icons.h"
+
 
 uint32_t lastTuneTime = 0;
+
+//
+// Hilfsfunktion: Zeichnet das La Linea Mono/Stereo Icon auf das Sprite
+//
+void updateStereoIndication(bool isStereo) {
+    // Position unterhalb der MHz-Anzeige (rechts)
+    int xPos = 220; 
+    int yPos = 100;
+    
+    if (isStereo) {
+        spr.pushImage(xPos, yPos, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_stereo);
+    } else {
+        spr.pushImage(xPos, yPos, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_mono);
+    }
+}
+
 
 //
 // Draw preferences write indicator
@@ -508,6 +526,12 @@ void drawScreen()
   {
     drawAbout();
     return;
+  }
+
+  // === LA LINEA STEREO/MONO ICON Zeichnen ===
+  // In FM-Modus zeichnen, basierend auf dem Stereo-Signal
+  if (currentMode == FM) {
+    updateStereoIndication(rx.getCurrentStereo());
   }
 
   switch(uiLayoutIdx)
