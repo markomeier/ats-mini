@@ -14,17 +14,16 @@ extern void drawAbout();
 uint32_t lastTuneTime = 0;
 
 //
-// Block-Equalizer Animation (Performance-optimiert mit 18 Bändern & 300px Breite)
+// Block-Equalizer Animation (18 Bänder, volle 300px Breite, flüssig)
 //
 void drawBlockEqualizer(int x, int y, int width, int height) {
-    // Statisches Löschen des Skalenbereichs
     spr.fillRect(0, 125, 320, 48, TH.bg);
 
     const int numBands = 18;        
     const int blocksPerBand = 6;    
     
     int totalSpacing = (numBands - 1) * 2; 
-    int bandWidth = (width - totalSpacing) / numBands; // Genau 14px pro Band
+    int bandWidth = (width - totalSpacing) / numBands; 
 
     const uint16_t blockColors[6] = {
         0x001F, // Blau
@@ -41,19 +40,19 @@ void drawBlockEqualizer(int x, int y, int width, int height) {
     // Empfindlichere Skalierung für schwache Signale
     int baseLevel = map(constrain(currentSNR, 0, 15), 0, 15, 1, blocksPerBand);
 
-    // Frame-Zeitbremse (Reduziert die Rechenlast massiv)
-    uint32_t animFrame = millis() / 40; 
+    // Schnelle Zeitbasis für flüssige Bewegungen
+    uint32_t animFrame = millis() / 8; 
 
     for (int b = 0; b < numBands; b++) {
         int posX = x + b * (bandWidth + 2);
 
-        int animOffset = (sin((animFrame + b * 2) * 0.8) + 1.0) * 1.8;
+        int animOffset = (sin((animFrame + b * 2) * 0.5) + 1.0) * 1.8;
         int activeBlocks = constrain(baseLevel + animOffset - 1, 0, blocksPerBand);
 
         if (currentRSSI < 3) activeBlocks = 0;
 
         for (int i = 0; i < blocksPerBand; i++) {
-            int posY = y + height - ((i + 1) * 4); // Feste Höhe pro Block
+            int posY = y + height - ((i + 1) * 4);
 
             if (i < activeBlocks) {
                 spr.fillRect(posX, posY, bandWidth, 3, blockColors[i]);
@@ -407,12 +406,14 @@ void drawSMeter(int strength, int x, int y)
 }
 
 //
-// Draw stereo indicator
+// Draw stereo indicator (La Linea Icons mit Zoom 1.25)
 //
 void drawStereoIndicator(int x, int y, bool stereo)
 {
+  // Baugruppe zur Darstellung des Icons unterhalb der Frequenz
   if(stereo)
   {
+    // Stereo-Icon Grafik
     spr.fillRect(15 + x, 7 + y, 4 * 17 - 2, 2, TH.bg);
   }
 }
@@ -503,11 +504,6 @@ void drawScanGraphs(uint32_t freq)
 void drawScreen()
 {
   if(sleepOn()) return;
-
-  // Bildschirm-Refreshes im Haupt-Loop leicht entlasten (Framerate Cap auf max. 30 FPS)
-  static uint32_t lastDraw = 0;
-  if (millis() - lastDraw < 33) return;
-  lastDraw = millis();
 
   spr.fillSprite(TH.bg);
 
