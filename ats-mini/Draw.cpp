@@ -7,6 +7,11 @@
 #include "Draw.h"
 #include "Audio_icons.h"
 
+// --- EXTERNE DEKLARATIONEN FÜR DEN GITHUB-BUILDER ---
+extern void drawLayoutSmeter();
+extern void drawLayoutDefault();
+extern void drawAbout();
+
 uint32_t lastTuneTime = 0;
 
 //
