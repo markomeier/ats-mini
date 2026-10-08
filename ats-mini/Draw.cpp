@@ -7,17 +7,16 @@
 #include "Draw.h"
 #include "Audio_icons.h"
 
-
 uint32_t lastTuneTime = 0;
 
 //
 // Hilfsfunktion: Zeichnet das La Linea Mono/Stereo Icon auf das Sprite
-// Färbt rote Bestandteile (Schrift & Linie) automatisch in Neongrün (0x07E0) um
+// Skalierung 1.25 für gute Lesbarkeit & richtige Positionierung
 //
 void updateStereoIndication(bool isStereo) {
-    int xPos = 242; 
-    int yPos = 52;      
-    float zoom = 1.5;  
+    int xPos = 225;     // Position leicht angepasst
+    int yPos = 50;      
+    float zoom = 1.25;  // Zoom 1.25 wie gewünscht
 
     int totalPixels = AUDIO_ICON_WIDTH * AUDIO_ICON_HEIGHT;
     static uint16_t colored_icon[AUDIO_ICON_WIDTH * AUDIO_ICON_HEIGHT];
@@ -25,12 +24,10 @@ void updateStereoIndication(bool isStereo) {
     // Quellbild auswählen
     const uint16_t* src_icon = isStereo ? img_stereo : img_mono;
 
-    // Pixel durchgehen und Rot durch Neongrün (0x07E0) ersetzen
+    // Pixel durchgehen und Rot-Töne durch Neongrün (0x07E0) ersetzen
     for (int i = 0; i < totalPixels; i++) {
         uint16_t pixel = src_icon[i];
 
-        // Erkennung von Rot-Tönen im RGB565-Format (hoher Rot-Anteil, wenig Grün/Blau)
-        // Bei aktiviertem SwapBytes entspricht das Rot-Muster meist Werten > 0xF000 oder starkem Rot-Kanal
         uint8_t r = (pixel >> 11) & 0x1F;
         uint8_t g = (pixel >> 5) & 0x3F;
         uint8_t b = pixel & 0x1F;
@@ -38,19 +35,61 @@ void updateStereoIndication(bool isStereo) {
         if (r > 15 && g < 15 && b < 15) {
             colored_icon[i] = 0x07E0; // Neongrün
         } else {
-            colored_icon[i] = pixel;  // Originalfarbe beibehalten (z. B. schwarzer/transparenter Hintergrund)
+            colored_icon[i] = pixel;  
         }
     }
 
     spr.setSwapBytes(true);
 
-    // Das umgefärbte Icon zeichnen
+    // Icon mit Zoom 1.25 zeichnen
     spr.pushImageRotateZoom(xPos, yPos, 0, 0, 0, zoom, zoom, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, colored_icon);
 
     spr.setSwapBytes(false);
 }
 
+//
+// Block-Equalizer Animation (aus dem Video bei Sek. 9-10)
+//
+void drawBlockEqualizer(int x, int y, int width, int height) {
+    const int numBands = 16;        
+    const int blocksPerBand = 6;    
+    
+    int bandWidth = (width / numBands) - 2; 
+    int blockHeight = (height / blocksPerBand) - 1; 
 
+    const uint16_t blockColors[6] = {
+        0x001F, // Blau
+        0x07E0, // Grün
+        0x87E0, // Gelb-Grün
+        0xFFE0, // Gelb
+        0xFCA0, // Orange
+        0xF800  // Rot
+    };
+
+    int currentSNR = rx.getCurrentSNR();
+    int currentRSSI = rx.getCurrentRSSI();
+    
+    int baseLevel = map(constrain(currentSNR, 0, 30), 0, 30, 1, blocksPerBand);
+
+    for (int b = 0; b < numBands; b++) {
+        int posX = x + b * (bandWidth + 2);
+
+        int variation = random(-1, 2);
+        int activeBlocks = constrain(baseLevel + variation, 0, blocksPerBand);
+
+        if (currentRSSI < 10) activeBlocks = 0;
+
+        for (int i = 0; i < blocksPerBand; i++) {
+            int posY = y + height - ((i + 1) * (blockHeight + 1));
+
+            if (i < activeBlocks) {
+                spr.fillRect(posX, posY, bandWidth, blockHeight, blockColors[i]);
+            } else {
+                spr.fillRect(posX, posY, bandWidth, blockHeight, 0x18E3);
+            }
+        }
+    }
+}
 
 //
 // Draw preferences write indicator
@@ -59,7 +98,6 @@ void drawSaveIndicator(int x, int y)
 {
   if(prefsAreWritten() || switchThemeEditor())
   {
-    // Draw preferences write request icon
     spr.fillRect(x+3, y+2, 3, 5, TH.save_icon);
     spr.fillTriangle(x+1, y+7, x+7, y+7, x+4, y+10, TH.save_icon);
     spr.drawLine(x, y+12, x, y+13, TH.save_icon);
@@ -75,12 +113,10 @@ void drawBleIndicator(int x, int y)
 {
   int8_t status = getBleStatus();
 
-  // If need to draw BLE icon...
   if(status || switchThemeEditor())
   {
     uint16_t color = (status>0) ? TH.rf_icon_conn : TH.rf_icon;
 
-    // For the editor, alternate between BLE states every ~8 seconds
     if(switchThemeEditor())
       color = millis()&0x2000? TH.rf_icon_conn : TH.rf_icon;
 
@@ -99,12 +135,10 @@ void drawWiFiIndicator(int x, int y)
 {
   int8_t status = getWiFiStatus();
 
-  // If need to draw WiFi icon...
   if(status || switchThemeEditor())
   {
     uint16_t color = (status>0) ? TH.rf_icon_conn : TH.rf_icon;
 
-    // For the editor, alternate between WiFi states every ~8 seconds
     if(switchThemeEditor())
       color = millis()&0x2000? TH.rf_icon_conn : TH.rf_icon;
 
@@ -121,7 +155,6 @@ bool drawStatus(int x, int y)
 {
   if(statusLines[0][0] || statusLines[1][0])
   {
-    // Draw two lines of operation status
     spr.setTextDatum(TC_DATUM);
     spr.setTextColor(0x07E0);
     spr.drawString(statusLines[0], x, y, FONT_SMALL);
@@ -172,36 +205,22 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 }
 
 //
-// Draw radio text (RDS und Signalwerte in grosser Schrift)
-// Fix für LovyanGFX v1.x Deprecation Warnings
+// Draw radio text (NUR NOCH RDS SENDERNAMEN - ohne S/SNR Werte)
 //
 void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
   
   spr.setTextColor(0x07E0);   // Neongrün
-  spr.setTextSize(1.0);       // Standard-Skalierung für saubere Pixel
-  spr.setFont(&fonts::Font4); // Font 4 explizit als IFont setzen
+  spr.setTextSize(1.0);       
+  spr.setFont(&fonts::Font4); 
 
-  // Fall 1: RDS-Text vorhanden -> Zentriert mit Font 4 gross zeichnen
+  // Zeige den RDS-Sendernamen zentriert an, falls empfangen
   if (rt && *rt) 
   {
     spr.setTextDatum(TC_DATUM);
     spr.drawString(rt, 160, y);
   } 
-  // Fall 2: Kein RDS -> Signalwerte in Font 4 (kompakt formatiert für 2-stellige Werte)
-  else 
-  {
-    spr.setTextDatum(TL_DATUM);
-
-    char sigBuf[32];
-    // Straffes Format, damit selbst bei S:99 | SNR:30 dB nichts rechts abgeschnitten wird
-    snprintf(sigBuf, sizeof(sigBuf), "S:%d | SNR:%d dB", rx.getCurrentRSSI(), rx.getCurrentSNR());
-    
-    // Font 4 verwenden (groß & gut lesbar)
-    // X = 90 schiebt den Text passgenau rechts neben die gelbe Box
-    spr.drawString(sigBuf, 90, y - 6);
-  }
 }
 
 //
@@ -209,57 +228,52 @@ void drawRadioText(int y, int ymax)
 //
 void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 {
-  // --- AUTOMATISCHE TUNING-ERKENNUNG ---
   static uint32_t lastFreq = 0;
 
   if (freq != lastFreq) {
     lastFreq = freq;
-    lastTuneTime = millis(); // Kurbeln erkannt -> Timer triggern!
+    lastTuneTime = millis(); // Drehen registrieren
   }
 
-  // Farbwahl: Gelb (0xFFE0) während des Drehens (800ms), sonst Neongrün (0x07E0)
   uint16_t unitColor = ((millis() - lastTuneTime) < 800) ? 0xFFE0 : 0x07E0;
-  // --------------------------------------------------------------------------
 
   struct Line { int x, y, w; };
 
   const Line hlDigitsFM[] =
   {
-    { x - 30 - 32 * 0 -  0, y + 28, 27 }, //         .01
-    { x - 30 - 32 * 0 - 16, y + 28, 27 + 16 }, //    .05
-    { x - 30 - 32 * 1 -  0, y + 28, 27 }, //         .10
-    { x - 30 - 32 * 1 - 22, y + 28, 27 + 22 }, //    .50
-    { x - 30 - 32 * 2 - 12, y + 28, 27 }, //        1.00
-    { x - 30 - 32 * 2 - 28, y + 28, 27 + 16 }, //   5.00
-    { x - 30 - 32 * 3 - 12, y + 28, 27 }, //       10.00
-    { x - 30 - 32 * 3 - 28, y + 28, 27 + 16 }, //  50.00
-    { x - 30 - 32 * 4 +  4, y + 28, 11 }, //      100.00
+    { x - 30 - 32 * 0 -  0, y + 28, 27 }, 
+    { x - 30 - 32 * 0 - 16, y + 28, 27 + 16 }, 
+    { x - 30 - 32 * 1 -  0, y + 28, 27 }, 
+    { x - 30 - 32 * 1 - 22, y + 28, 27 + 22 }, 
+    { x - 30 - 32 * 2 - 12, y + 28, 27 }, 
+    { x - 30 - 32 * 2 - 28, y + 28, 27 + 16 }, 
+    { x - 30 - 32 * 3 - 12, y + 28, 27 }, 
+    { x - 30 - 32 * 3 - 28, y + 28, 27 + 16 }, 
+    { x - 30 - 32 * 4 +  4, y + 28, 11 }, 
   };
 
   const Line hlDigitsAMSSB[] =
   {
-    { x + 12 + 14 * 2 -  0, y + 28, 12 }, //           .001
-    { x + 12 + 14 * 2 -  7, y + 28, 12 + 7 }, //       .005
-    { x + 12 + 14 * 1 -  0, y + 28, 12 }, //           .010
-    { x + 12 + 14 * 1 -  7, y + 28, 12 + 7 }, //       .050
-    { x + 12 + 14 * 0 -  0, y + 28, 12 }, //           .100
-    { x + 12 + 14 * 0 - 11, y + 28, 12 + 11 }, //      .500
-    { x - 30 - 32 * 0 -  0, y + 28, 27 }, //          1.000
-    { x - 30 - 32 * 0 - 16, y + 28, 27 + 16 }, //     5.000
-    { x - 30 - 32 * 1 -  0, y + 28, 27 }, //         10.000
-    { x - 30 - 32 * 1 - 16, y + 28, 27 + 16 }, //    50.000
-    { x - 30 - 32 * 2 -  0, y + 28, 27 }, //        100.000
-    { x - 30 - 32 * 2 - 16, y + 28, 27 + 16 }, //   500.000
-    { x - 30 - 32 * 3 -  0, y + 28, 27 }, //       1000.000
-    { x - 30 - 32 * 3 - 16, y + 28, 27 + 16 }, //  5000.000
-    { x - 30 - 32 * 4 -  0, y + 28, 27 }, //      10000.000
+    { x + 12 + 14 * 2 -  0, y + 28, 12 }, 
+    { x + 12 + 14 * 2 -  7, y + 28, 12 + 7 }, 
+    { x + 12 + 14 * 1 -  0, y + 28, 12 }, 
+    { x + 12 + 14 * 1 -  7, y + 28, 12 + 7 }, 
+    { x + 12 + 14 * 0 -  0, y + 28, 12 }, 
+    { x + 12 + 14 * 0 - 11, y + 28, 12 + 11 }, 
+    { x - 30 - 32 * 0 -  0, y + 28, 27 }, 
+    { x - 30 - 32 * 0 - 16, y + 28, 27 + 16 }, 
+    { x - 30 - 32 * 1 -  0, y + 28, 27 }, 
+    { x - 30 - 32 * 1 - 16, y + 28, 27 + 16 }, 
+    { x - 30 - 32 * 2 -  0, y + 28, 27 }, 
+    { x - 30 - 32 * 2 - 16, y + 28, 27 + 16 }, 
+    { x - 30 - 32 * 3 -  0, y + 28, 27 }, 
+    { x - 30 - 32 * 3 - 16, y + 28, 27 + 16 }, 
+    { x - 30 - 32 * 4 -  0, y + 28, 27 }, 
   };
 
-  // Top bit specifies if the digit selector is on
   bool selectOn = hl & 0x80;
   const struct Line *li;
 
-  // Lower 7 bits specify the selected digit
   hl &= 0x7F;
 
   spr.setTextDatum(MR_DATUM);
@@ -267,23 +281,19 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 
   if(currentMode==FM)
   {
-    // Determine where underscore is located
     li = hl<ITEM_COUNT(hlDigitsFM)? &hlDigitsFM[hl] : 0;
 
-    // FM frequency
     spr.drawFloat(freq/100.00, 2, x, y, FONT_DIGITS);
     spr.setTextDatum(ML_DATUM);
-    spr.setTextColor(unitColor); // Dynamische Farbe (Gelb beim Tunen, sonst Neongrün)
+    spr.setTextColor(unitColor); 
     spr.drawString("MHz", ux, uy);
   }
   else
   {
-    // Determine where underscore is located
     li = hl<ITEM_COUNT(hlDigitsAMSSB)? &hlDigitsAMSSB[hl] : 0;
 
     if(isSSB())
     {
-      // SSB frequency
       char text[32];
       freq = freq * 1000 + currentBFO;
       sprintf(text, "%3.3lu", freq / 1000);
@@ -294,18 +304,15 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
     }
     else
     {
-      // AM frequency
       spr.drawNumber(freq, x, y, FONT_DIGITS);
       spr.setTextDatum(ML_DATUM);
       spr.drawString(".000", 4+x, 17+y, FONT_LARGE);
     }
 
-    // SSB/AM frequencies are measured in kHz
-    spr.setTextColor(unitColor); // Dynamische Farbe (Gelb beim Tunen, sonst Neongrün)
+    spr.setTextColor(unitColor); 
     spr.drawString("kHz", ux, uy);
   }
 
-  // If drawing an underscore...
   if(li)
   {
     if(selectOn)
@@ -326,30 +333,22 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 //
 void drawScale(uint32_t freq)
 {
-  // 1. Roter Kreis oben (Mittelpunkt x=160, y=140, Radius=5)
   spr.fillCircle(160, 140, 5, 0xF800);
   
-  // 2. Dickerer roter Zeigerstrich (2 Pixel breit, von Y=145 bis Y=169)
   spr.drawFastVLine(160, 145, 24, 0xF800);
   spr.drawFastVLine(161, 145, 24, 0xF800);
 
-  // 3. Führungslinien (Ober- und Unterkante)
-  spr.drawFastHLine(0, 148, 320, TH.scale_line); // Obere Führungslinie
-  spr.drawFastHLine(0, 169, 320, TH.scale_line); // Untere Führungslinie
+  spr.drawFastHLine(0, 148, 320, TH.scale_line); 
+  spr.drawFastHLine(0, 169, 320, TH.scale_line); 
 
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text);
 
-  // Extra frequencies to draw outside the screen boundaries
   int16_t slack = 3;
-
-  // Scale offset
   int16_t offset = ((freq % 10) / 10.0 + slack) * 8;
 
-  // Start drawing frequencies from the left
   freq = freq / 10 - 20 - slack;
 
-  // Get band edges
   const Band *band = getCurrentBand();
   uint32_t minFreq = band->minimumFreq / 10;
   uint32_t maxFreq = band->maximumFreq / 10;
@@ -364,11 +363,9 @@ void drawScale(uint32_t freq)
 
       if((freq % 10) == 0)
       {
-        // 10er-Hauptstriche (doppelt für fettere Optik)
         spr.drawFastVLine(x, 149, 20, lineColor);
         spr.drawFastVLine(x + 1, 149, 20, lineColor);
 
-        // Frequenzzahlen direkt über der Skala
         if(currentMode == FM)
           spr.drawFloat(freq / 10.0, 1, x, 140, FONT_SMALL);
         else if(freq >= 100)
@@ -378,12 +375,10 @@ void drawScale(uint32_t freq)
       }
       else if((freq % 5) == 0 && (freq % 10) != 0)
       {
-        // 5er-Striche (mittellang)
         spr.drawFastVLine(x, 157, 12, lineColor);
       }
       else
       {
-        // 1er-Striche (kurz)
         spr.drawFastVLine(x, 162, 7, lineColor);
       }
     }
@@ -391,7 +386,7 @@ void drawScale(uint32_t freq)
 }
 
 //
-// Draw S-meter mit flüssigem Peak-Hold Abfalleffekt
+// Draw S-meter mit Peak-Hold Abfalleffekt
 //
 void drawSMeter(int strength, int x, int y)
 {
@@ -401,13 +396,11 @@ void drawSMeter(int strength, int x, int y)
 
   uint32_t now = millis();
 
-  // Neuer Höchstwert erreicht -> Peak anheben & Timer zurücksetzen
   if (strength >= peakBar) {
     peakBar = strength;
     lastPeakTime = now;
     lastDecayTime = now;
   } 
-  // Nach 1.2 Sekunden Inaktivität schrittweise alle 150ms abfallen lassen
   else if (now - lastPeakTime > 1200) {
     if (now - lastDecayTime > 150) {
       if (peakBar > 0) peakBar--;
@@ -424,7 +417,6 @@ void drawSMeter(int strength, int x, int y)
 
     if (i == peakBar && peakBar > 0)
     {
-      // Peak-Hold: Der aktuell gehaltene/abfallende Peak-Balken ist ROTE ZIEL-MARKE
       spr.fillRect(barX, 2 + y, 2, 12, 0xF800);
     }
     else if (i < 10 && i < strength)
@@ -449,7 +441,6 @@ void drawStereoIndicator(int x, int y, bool stereo)
 {
   if(stereo)
   {
-    // Split S-meter into two rows
     spr.fillRect(15 + x, 7 + y, 4 * 17 - 2, 2, TH.bg);
   }
 }
@@ -494,13 +485,9 @@ void drawLongStationName(const char *name, int x, int y)
 //
 void drawScanGraphs(uint32_t freq)
 {
-  // Scale offset
   int16_t offset = (freq % 10) / 10.0 * 8;
-
-  // Start drawing frequencies from the left
   freq = freq / 10 - 20;
 
-  // Get band edges
   const Band *band = getCurrentBand();
   uint32_t minFreq = band->minimumFreq / 10;
   uint32_t maxFreq = band->maximumFreq / 10;
@@ -534,30 +521,26 @@ void drawScanGraphs(uint32_t freq)
       }
     }
   }
-  // Scale pointer
   spr.fillTriangle(156, 125, 160, 130, 164, 125, TH.scale_pointer);
   spr.drawLine(160, 130, 160, 169, TH.scale_pointer);
 }
 
 //
-// Draw screen according to given command
+// Hauptfunktion zum Zeichnen des Bildschirms
 //
 void drawScreen()
 {
   if(sleepOn()) return;
 
-  // Clear screen buffer
   spr.fillSprite(TH.bg);
 
-  // About screen is a special case
   if(currentCmd==CMD_ABOUT)
   {
     drawAbout();
     return;
   }
 
-  // === LA LINEA STEREO/MONO ICON Zeichnen ===
-  // Im FM-Modus basierend auf dem Stereo-Pilotton zeichnen
+  // === LA LINEA ICON (Stereo/Mono) ===
   if (currentMode == FM) {
     updateStereoIndication(rx.getCurrentPilot());
   }
@@ -570,6 +553,17 @@ void drawScreen()
     default:
       drawLayoutDefault();
       break;
+  }
+
+  // === DYNAMISCHER WECHSEL: SKALA <-> EQUALIZER ===
+  // Wenn seit dem letzten Drehen am Knopf mehr als 3 Sekunden vergangen sind:
+  if ((millis() - lastTuneTime) > 3000) 
+  {
+    drawBlockEqualizer(10, 142, 300, 26);
+  } 
+  else 
+  {
+    drawScale(currentFreq);
   }
 
   spr.pushSprite(0, 0);
