@@ -14,15 +14,21 @@ uint32_t lastTuneTime = 0;
 // Hilfsfunktion: Zeichnet das La Linea Mono/Stereo Icon auf das Sprite
 //
 void updateStereoIndication(bool isStereo) {
-    // Position unterhalb der MHz-Anzeige (rechts)
-    int xPos = 220; 
-    int yPos = 100;
+    // Korrigierte Position: weiter nach rechts (236) und höher (78), über der Skala
+    int xPos = 236; 
+    int yPos = 78;
     
+    // Tauscht die Farbbytes für korrekte RGB565-Farbdarstellung (behebt Blau/Rot Dreher)
+    spr.setSwapBytes(true);
+
     if (isStereo) {
         spr.pushImage(xPos, yPos, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_stereo);
     } else {
         spr.pushImage(xPos, yPos, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_mono);
     }
+
+    // Byte-Swap für normalen Text/Grafik-Betrieb wieder zurücksetzen
+    spr.setSwapBytes(false);
 }
 
 
