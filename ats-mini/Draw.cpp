@@ -5,7 +5,6 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
-#include "Audio_icons.h"
 
 // --- EXTERNE DEKLARATIONEN FÜR DEN GITHUB-BUILDER ---
 extern void drawLayoutSmeter();
@@ -15,48 +14,32 @@ extern void drawAbout();
 uint32_t lastTuneTime = 0;
 
 //
-// Hilfsfunktion: Zeichnet das La Linea Mono/Stereo Icon auf das Sprite
-// Skalierung 1.25 für gute Lesbarkeit & richtige Positionierung
+// Hilfsfunktion: Zeichnet S-Wert und SNR-Wert in Neongrün
 //
-void updateStereoIndication(bool isStereo) {
-    int xPos = 225;     // Position horizontal beibehalten
-    int yPos = 65;      // Dezent nach unten versetzt (vorher 50)
-    float zoom = 1.25;  // Zoom 1.25 wie gewünscht
+void drawSignalValues(int x, int y) {
+    int currentSNR = rx.getCurrentSNR();
+    int currentRSSI = rx.getCurrentRSSI();
 
-    int totalPixels = AUDIO_ICON_WIDTH * AUDIO_ICON_HEIGHT;
-    static uint16_t colored_icon[AUDIO_ICON_WIDTH * AUDIO_ICON_HEIGHT];
+    spr.setTextDatum(TL_DATUM);
+    spr.setTextColor(0x07E0); // Neongrün
+    spr.setFont(&fonts::Font2); // Gut lesbare, kompakte Schriftart
 
-    // Quellbild auswählen
-    const uint16_t* src_icon = isStereo ? img_stereo : img_mono;
+    char buf[20];
+    
+    // S-Wert (RSSI)
+    sprintf(buf, "S: %d", currentRSSI);
+    spr.drawString(buf, x, y);
 
-    // Pixel durchgehen und Rot-Töne durch Neongrün (0x07E0) ersetzen
-    for (int i = 0; i < totalPixels; i++) {
-        uint16_t pixel = src_icon[i];
-
-        uint8_t r = (pixel >> 11) & 0x1F;
-        uint8_t g = (pixel >> 5) & 0x3F;
-        uint8_t b = pixel & 0x1F;
-
-        if (r > 15 && g < 15 && b < 15) {
-            colored_icon[i] = 0x07E0; // Neongrün
-        } else {
-            colored_icon[i] = pixel;  
-        }
-    }
-
-    spr.setSwapBytes(true);
-
-    // Icon mit Zoom 1.25 zeichnen
-    spr.pushImageRotateZoom(xPos, yPos, 0, 0, 0, zoom, zoom, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, colored_icon);
-
-    spr.setSwapBytes(false);
+    // SNR-Wert darunter
+    sprintf(buf, "SNR: %d dB", currentSNR);
+    spr.drawString(buf, x, y + 16);
 }
 
 //
-// Block-Equalizer Animation (Löscht die Skala vollständig & bewegt sich flüssig)
+// Block-Equalizer Animation (EXTREM SCHNELL & DYNAMISCH)
 //
 void drawBlockEqualizer(int x, int y, int width, int height) {
-    // 1. Wischt den gesamten Skalenbereich (ab y=125 bis y=173) inklusive Zahlen und Zeiger komplett weg
+    // Wischt den gesamten Skalenbereich sauber weg
     spr.fillRect(0, 125, 320, 48, TH.bg);
 
     const int numBands = 16;        
@@ -77,17 +60,15 @@ void drawBlockEqualizer(int x, int y, int width, int height) {
     int currentSNR = rx.getCurrentSNR();
     int currentRSSI = rx.getCurrentRSSI();
     
-    // Basis-Pegel basierend auf Empfangssignal
     int baseLevel = map(constrain(currentSNR, 0, 30), 0, 30, 1, blocksPerBand);
 
-    // Zeitstempel für eine flüssige Animation (~60ms Bildwechsel)
-    uint32_t animFrame = millis() / 60;
+    // Schnelle Zeitbasis für rasante Bewegungen
+    uint32_t animFrame = millis() / 15;
 
     for (int b = 0; b < numBands; b++) {
         int posX = x + b * (bandWidth + 2);
 
-        // Dynamische Sinus-Welle + Signalpegel für geschmeidigen EQ-Effekt
-        int animOffset = (sin((animFrame + b * 2) * 0.5) + 1.0) * 1.5;
+        int animOffset = (sin((animFrame + b * 4) * 1.2) + 1.0) * 1.8;
         int activeBlocks = constrain(baseLevel + animOffset - 1, 0, blocksPerBand);
 
         if (currentRSSI < 10) activeBlocks = 0;
@@ -98,7 +79,7 @@ void drawBlockEqualizer(int x, int y, int width, int height) {
             if (i < activeBlocks) {
                 spr.fillRect(posX, posY, bandWidth, blockHeight, blockColors[i]);
             } else {
-                spr.fillRect(posX, posY, bandWidth, blockHeight, 0x18E3); // Inaktiver Block
+                spr.fillRect(posX, posY, bandWidth, blockHeight, 0x18E3);
             }
         }
     }
@@ -218,7 +199,7 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 }
 
 //
-// Draw radio text (NUR NOCH RDS SENDERNAMEN - ohne S/SNR Werte)
+// Draw radio text
 //
 void drawRadioText(int y, int ymax)
 {
@@ -228,7 +209,6 @@ void drawRadioText(int y, int ymax)
   spr.setTextSize(1.0);       
   spr.setFont(&fonts::Font4); 
 
-  // Zeige den RDS-Sendernamen zentriert an, falls empfangen
   if (rt && *rt) 
   {
     spr.setTextDatum(TC_DATUM);
@@ -245,7 +225,7 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 
   if (freq != lastFreq) {
     lastFreq = freq;
-    lastTuneTime = millis(); // Drehen registrieren
+    lastTuneTime = millis();
   }
 
   uint16_t unitColor = ((millis() - lastTuneTime) < 800) ? 0xFFE0 : 0x07E0;
@@ -553,10 +533,8 @@ void drawScreen()
     return;
   }
 
-  // === LA LINEA ICON (Stereo/Mono) ===
-  if (currentMode == FM) {
-    updateStereoIndication(rx.getCurrentPilot());
-  }
+  // === ANZEIGE S-WERT UND SNR (Neongrün) ===
+  drawSignalValues(220, 58);
 
   switch(uiLayoutIdx)
   {
@@ -569,7 +547,6 @@ void drawScreen()
   }
 
   // === DYNAMISCHER WECHSEL: SKALA <-> EQUALIZER ===
-  // Wenn seit dem letzten Drehen am Knopf mehr als 3 Sekunden vergangen sind:
   if ((millis() - lastTuneTime) > 3000) 
   {
     drawBlockEqualizer(10, 142, 300, 26);
