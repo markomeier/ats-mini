@@ -70,6 +70,9 @@ static char bufRadioText[100]   = "";
 static char bufProgramInfo[100] = "";
 static uint16_t piCode = 0x0000;
 
+// SPERRE FÜR FLÜSSIGES UI: Verhindert Dauer-I2C-Polling
+static bool rdsLocked = false; 
+
 const char *getStationName()
 {
   if(switchThemeEditor())
@@ -110,6 +113,9 @@ void clearStationInfo()
   bufRadioText[0]   = '\0'; // Multiline!
   bufRadioText[1]   = '\0';
   piCode = 0x0000;
+
+  // Sperre bei Senderwechsel/Reset aufheben
+  rdsLocked = false; 
 }
 
 static bool showStationName(const char *stationName, bool isLong = false)
@@ -124,7 +130,13 @@ static bool showStationName(const char *stationName, bool isLong = false)
       strcpy(bufStationName + 1, stationName);
     }
     else
+    {
       strcpy(bufStationName, stationName);
+      // Sobald ein echter Stationsname geladen ist -> RDS-Polling einfrieren!
+      if(strlen(stationName) > 1) {
+        rdsLocked = true;
+      }
+    }
     return(true);
   }
 
@@ -220,6 +232,9 @@ static bool showRdsTime()
 
 bool checkRds()
 {
+  // WENN RDS GELOCKT IST: Keine I2C-Abfragen mehr -> Der Equalizer läuft butterweich!
+  if(rdsLocked) return false;
+
   bool needRedraw = false;
   uint8_t mode = getRDSMode();
 
