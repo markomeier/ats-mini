@@ -151,7 +151,8 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
 }
 
 //
-// Draw radio text (RDS und Signalwerte in grosser Schrift Font 4)
+// Draw radio text (RDS und Signalwerte in grosser Schrift)
+// Fix für LovyanGFX v1.x Deprecation Warnings
 //
 void drawRadioText(int y, int ymax)
 {
@@ -159,12 +160,13 @@ void drawRadioText(int y, int ymax)
   
   spr.setTextColor(0x07E0);   // Neongrün
   spr.setTextSize(1.0);       // Standard-Skalierung für saubere Pixel
+  spr.setFont(&fonts::Font4); // Font 4 explizit als IFont setzen
 
   // Fall 1: RDS-Text vorhanden -> Zentriert mit Font 4 gross zeichnen
   if (rt && *rt) 
   {
     spr.setTextDatum(TC_DATUM);
-    spr.drawString(rt, 160, y, 4);
+    spr.drawString(rt, 160, y);
   } 
   // Fall 2: Kein RDS -> Signalwerte in Font 4 (kompakt formatiert für 2-stellige Werte)
   else 
@@ -177,7 +179,7 @@ void drawRadioText(int y, int ymax)
     
     // Font 4 verwenden (groß & gut lesbar)
     // X = 90 schiebt den Text passgenau rechts neben die gelbe Box
-    spr.drawString(sigBuf, 90, y - 6, 4);
+    spr.drawString(sigBuf, 90, y - 6);
   }
 }
 
