@@ -14,39 +14,17 @@ extern void drawAbout();
 uint32_t lastTuneTime = 0;
 
 //
-// Hilfsfunktion: Zeichnet S-Wert und SNR-Wert in Neongrün
-//
-void drawSignalValues(int x, int y) {
-    int currentSNR = rx.getCurrentSNR();
-    int currentRSSI = rx.getCurrentRSSI();
-
-    spr.setTextDatum(TL_DATUM);
-    spr.setTextColor(0x07E0); // Neongrün
-    spr.setFont(&fonts::Font2); // Gut lesbare, kompakte Schriftart
-
-    char buf[20];
-    
-    // S-Wert (RSSI)
-    sprintf(buf, "S: %d", currentRSSI);
-    spr.drawString(buf, x, y);
-
-    // SNR-Wert darunter
-    sprintf(buf, "SNR: %d dB", currentSNR);
-    spr.drawString(buf, x, y + 16);
-}
-
-//
-// Block-Equalizer Animation (17 Bands - Perfekte Bildschirmausnutzung)
+// Block-Equalizer Animation (Performance-optimiert mit 18 Bändern & 300px Breite)
 //
 void drawBlockEqualizer(int x, int y, int width, int height) {
-    // Wischt den gesamten Skalenbereich sauber weg
+    // Statisches Löschen des Skalenbereichs
     spr.fillRect(0, 125, 320, 48, TH.bg);
 
-    const int numBands = 17;        // Auf 17 Frequenzbänder erweitert
+    const int numBands = 18;        
     const int blocksPerBand = 6;    
     
-    int bandWidth = (width / numBands) - 2; 
-    int blockHeight = (height / blocksPerBand) - 1; 
+    int totalSpacing = (numBands - 1) * 2; 
+    int bandWidth = (width - totalSpacing) / numBands; // Genau 14px pro Band
 
     const uint16_t blockColors[6] = {
         0x001F, // Blau
@@ -60,26 +38,27 @@ void drawBlockEqualizer(int x, int y, int width, int height) {
     int currentSNR = rx.getCurrentSNR();
     int currentRSSI = rx.getCurrentRSSI();
     
-    int baseLevel = map(constrain(currentSNR, 0, 30), 0, 30, 1, blocksPerBand);
+    // Empfindlichere Skalierung für schwache Signale
+    int baseLevel = map(constrain(currentSNR, 0, 15), 0, 15, 1, blocksPerBand);
 
-    // Schnelle Zeitbasis für rasante Bewegungen
-    uint32_t animFrame = millis() / 15;
+    // Frame-Zeitbremse (Reduziert die Rechenlast massiv)
+    uint32_t animFrame = millis() / 40; 
 
     for (int b = 0; b < numBands; b++) {
         int posX = x + b * (bandWidth + 2);
 
-        int animOffset = (sin((animFrame + b * 4) * 1.2) + 1.0) * 1.8;
+        int animOffset = (sin((animFrame + b * 2) * 0.8) + 1.0) * 1.8;
         int activeBlocks = constrain(baseLevel + animOffset - 1, 0, blocksPerBand);
 
-        if (currentRSSI < 10) activeBlocks = 0;
+        if (currentRSSI < 3) activeBlocks = 0;
 
         for (int i = 0; i < blocksPerBand; i++) {
-            int posY = y + height - ((i + 1) * (blockHeight + 1));
+            int posY = y + height - ((i + 1) * 4); // Feste Höhe pro Block
 
             if (i < activeBlocks) {
-                spr.fillRect(posX, posY, bandWidth, blockHeight, blockColors[i]);
+                spr.fillRect(posX, posY, bandWidth, 3, blockColors[i]);
             } else {
-                spr.fillRect(posX, posY, bandWidth, blockHeight, 0x18E3);
+                spr.fillRect(posX, posY, bandWidth, 3, 0x18E3);
             }
         }
     }
@@ -525,6 +504,11 @@ void drawScreen()
 {
   if(sleepOn()) return;
 
+  // Bildschirm-Refreshes im Haupt-Loop leicht entlasten (Framerate Cap auf max. 30 FPS)
+  static uint32_t lastDraw = 0;
+  if (millis() - lastDraw < 33) return;
+  lastDraw = millis();
+
   spr.fillSprite(TH.bg);
 
   if(currentCmd==CMD_ABOUT)
@@ -532,9 +516,6 @@ void drawScreen()
     drawAbout();
     return;
   }
-
-  // === ANZEIGE S-WERT UND SNR (Neongrün) ===
-  drawSignalValues(220, 58);
 
   switch(uiLayoutIdx)
   {
@@ -546,7 +527,7 @@ void drawScreen()
       break;
   }
 
-  // === DYNAMISCHER WECHSEL: SKALA <-> EQUALIZER ===
+  // DYNAMISCHER WECHSEL: SKALA <-> EQUALIZER
   if ((millis() - lastTuneTime) > 3000) 
   {
     drawBlockEqualizer(10, 142, 300, 26);
