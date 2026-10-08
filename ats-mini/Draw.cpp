@@ -36,13 +36,13 @@ void drawSignalValues(int x, int y) {
 }
 
 //
-// Block-Equalizer Animation (EXTREM SCHNELL & DYNAMISCH)
+// Block-Equalizer Animation (17 Bands - Perfekte Bildschirmausnutzung)
 //
 void drawBlockEqualizer(int x, int y, int width, int height) {
     // Wischt den gesamten Skalenbereich sauber weg
     spr.fillRect(0, 125, 320, 48, TH.bg);
 
-    const int numBands = 16;        
+    const int numBands = 17;        // Auf 17 Frequenzbänder erweitert
     const int blocksPerBand = 6;    
     
     int bandWidth = (width / numBands) - 2; 
