@@ -12,7 +12,7 @@ uint32_t lastTuneTime = 0;
 
 //
 // Hilfsfunktion: Zeichnet das La Linea Mono/Stereo Icon auf das Sprite
-// mit leichtem Software-Zoom (115%)
+// mit leichtem Software-Zoom (115%) über pushImageRotateZoom
 //
 void updateStereoIndication(bool isStereo) {
     int xPos = 238; 
@@ -22,9 +22,10 @@ void updateStereoIndication(bool isStereo) {
     spr.setSwapBytes(true);
 
     if (isStereo) {
-        spr.pushRotateZoom(xPos, yPos, 0, 0, 0, zoom, zoom, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_stereo);
+        // pushImageRotateZoom ist die korrekte LovyanGFX-Funktion für Pixel-Arrays (RGB565)
+        spr.pushImageRotateZoom(xPos, yPos, 0, 0, 0, zoom, zoom, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_stereo);
     } else {
-        spr.pushRotateZoom(xPos, yPos, 0, 0, 0, zoom, zoom, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_mono);
+        spr.pushImageRotateZoom(xPos, yPos, 0, 0, 0, zoom, zoom, AUDIO_ICON_WIDTH, AUDIO_ICON_HEIGHT, img_mono);
     }
 
     spr.setSwapBytes(false);
