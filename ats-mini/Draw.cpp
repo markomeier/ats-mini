@@ -11,6 +11,7 @@
 extern void drawLayoutSmeter();
 extern void drawLayoutDefault();
 extern void drawAbout();
+extern uint32_t currentFreq; 
 
 uint32_t lastTuneTime = 0;
 
