@@ -529,9 +529,9 @@ void drawScreen()
   }
 
   // === LA LINEA STEREO/MONO ICON Zeichnen ===
-  // In FM-Modus zeichnen, basierend auf dem Stereo-Signal
+  // Im FM-Modus basierend auf dem Stereo-Pilotton zeichnen
   if (currentMode == FM) {
-    updateStereoIndication(rx.getCurrentStereo());
+    updateStereoIndication(rx.getCurrentPilot());
   }
 
   switch(uiLayoutIdx)
