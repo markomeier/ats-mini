@@ -5,19 +5,20 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
+#include "Audio_icons.h" // Inkl. img_stereo & img_mono
 
-// --- EXTERNE DEKLARATIONEN FÜR DEN GITHUB-BUILDER ---
 extern void drawLayoutSmeter();
 extern void drawLayoutDefault();
 extern void drawAbout();
 
 uint32_t lastTuneTime = 0;
 
-//
-// Block-Equalizer Animation (18 Bänder, volle 300px Breite, flüssig)
-//
+// Schnelle Sinus-Lookuptabelle (Integer) für Ruckelfreiheit ohne FPU-Lags
+static const uint8_t sinTable[16] = { 0, 1, 3, 4, 5, 5, 5, 4, 3, 1, 0, 0, 0, 0, 0, 0 };
+
 void drawBlockEqualizer(int x, int y, int width, int height) {
-    spr.fillRect(0, 125, 320, 48, TH.bg);
+    // Wischt erst ab y=126, damit der gelbe Rahmen der Statusbox intakt bleibt!
+    spr.fillRect(0, 126, 320, 47, TH.bg);
 
     const int numBands = 18;        
     const int blocksPerBand = 6;    
@@ -34,22 +35,28 @@ void drawBlockEqualizer(int x, int y, int width, int height) {
         0xF800  // Rot
     };
 
-    int currentSNR = rx.getCurrentSNR();
-    int currentRSSI = rx.getCurrentRSSI();
-    
-    // Empfindlichere Skalierung für schwache Signale
-    int baseLevel = map(constrain(currentSNR, 0, 15), 0, 15, 1, blocksPerBand);
+    // Empfangswerte alle 200ms cachen, um I2C-Traffic beim Rendern zu verringern
+    static int cachedSNR = 10;
+    static int cachedRSSI = 20;
+    static uint32_t lastRFCheck = 0;
 
-    // Schnelle Zeitbasis für flüssige Bewegungen
-    uint32_t animFrame = millis() / 8; 
+    if (millis() - lastRFCheck > 200) {
+        cachedSNR = rx.getCurrentSNR();
+        cachedRSSI = rx.getCurrentRSSI();
+        lastRFCheck = millis();
+    }
+    
+    int baseLevel = map(constrain(cachedSNR, 0, 15), 0, 15, 1, blocksPerBand);
+    uint32_t animTick = millis() / 40; 
 
     for (int b = 0; b < numBands; b++) {
         int posX = x + b * (bandWidth + 2);
 
-        int animOffset = (sin((animFrame + b * 2) * 0.5) + 1.0) * 1.8;
-        int activeBlocks = constrain(baseLevel + animOffset - 1, 0, blocksPerBand);
+        int offsetIdx = (animTick + b * 2) % 16;
+        int animOffset = sinTable[offsetIdx];
 
-        if (currentRSSI < 3) activeBlocks = 0;
+        int activeBlocks = constrain(baseLevel + animOffset - 1, 0, blocksPerBand);
+        if (cachedRSSI < 3) activeBlocks = 0;
 
         for (int i = 0; i < blocksPerBand; i++) {
             int posY = y + height - ((i + 1) * 4);
@@ -63,9 +70,6 @@ void drawBlockEqualizer(int x, int y, int width, int height) {
     }
 }
 
-//
-// Draw preferences write indicator
-//
 void drawSaveIndicator(int x, int y)
 {
   if(prefsAreWritten() || switchThemeEditor())
@@ -78,9 +82,6 @@ void drawSaveIndicator(int x, int y)
   }
 }
 
-//
-// Draw Bluetooth indicator
-//
 void drawBleIndicator(int x, int y)
 {
   int8_t status = getBleStatus();
@@ -100,9 +101,6 @@ void drawBleIndicator(int x, int y)
   }
 }
 
-//
-// Draw WiFi indicator
-//
 void drawWiFiIndicator(int x, int y)
 {
   int8_t status = getWiFiStatus();
@@ -120,9 +118,6 @@ void drawWiFiIndicator(int x, int y)
   }
 }
 
-//
-// Draw operation status
-//
 bool drawStatus(int x, int y)
 {
   if(statusLines[0][0] || statusLines[1][0])
@@ -137,9 +132,6 @@ bool drawStatus(int x, int y)
   return(false);
 }
 
-//
-// Draw zoomed menu item
-//
 void drawZoomedMenu(const char *text, bool force)
 {
   if (!zoomMenu && !force) return;
@@ -151,9 +143,6 @@ void drawZoomedMenu(const char *text, bool force)
   spr.drawRoundRect(RDS_OFFSET_X - 72, RDS_OFFSET_Y - 3, 154, 28, 4, TH.menu_border);
 }
 
-//
-// Show overlay message in large letters
-//
 void drawMessage(const char *msg)
 {
   if(sleepOn()) return;
@@ -162,9 +151,6 @@ void drawMessage(const char *msg)
   spr.pushSprite(0, 0);
 }
 
-//
-// Draw band and mode indicators
-//
 void drawBandAndMode(const char *band, const char *mode, int x, int y)
 {
   spr.setTextDatum(TC_DATUM);
@@ -176,14 +162,11 @@ void drawBandAndMode(const char *band, const char *mode, int x, int y)
   uint16_t mode_width = spr.drawString(mode, x + band_width / 2 + 10, y);
 }
 
-//
-// Draw radio text
-//
 void drawRadioText(int y, int ymax)
 {
   const char *rt = getRadioText();
   
-  spr.setTextColor(0x07E0);   // Neongrün
+  spr.setTextColor(0x07E0);   
   spr.setTextSize(1.0);       
   spr.setFont(&fonts::Font4); 
 
@@ -194,9 +177,6 @@ void drawRadioText(int y, int ymax)
   } 
 }
 
-//
-// Draw frequency
-//
 void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 {
   static uint32_t lastFreq = 0;
@@ -299,9 +279,6 @@ void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
   }
 }
 
-//
-// Draw tuner scale Roehrenradiostyle
-//
 void drawScale(uint32_t freq)
 {
   spr.fillCircle(160, 140, 5, 0xF800);
@@ -356,9 +333,6 @@ void drawScale(uint32_t freq)
   }
 }
 
-//
-// Draw S-meter mit Peak-Hold Abfalleffekt
-//
 void drawSMeter(int strength, int x, int y)
 {
   static int peakBar = 0;
@@ -406,21 +380,27 @@ void drawSMeter(int strength, int x, int y)
 }
 
 //
-// Draw stereo indicator (La Linea Icons mit Zoom 1.25)
+// Draw stereo indicator (LA LINEA ICONS MIT KOORDINATEN- UND FARBKORREKTUR ROT -> GRÜN)
 //
 void drawStereoIndicator(int x, int y, bool stereo)
 {
-  // Baugruppe zur Darstellung des Icons unterhalb der Frequenz
-  if(stereo)
-  {
-    // Stereo-Icon Grafik
-    spr.fillRect(15 + x, 7 + y, 4 * 17 - 2, 2, TH.bg);
+  const uint16_t *iconSrc = stereo ? img_stereo : img_mono;
+  
+  // Rendert die Bitmap Pixel für Pixel mit Farbkorrektur von Rot (0xF800) auf Neongrün (0x07E0)
+  for (int py = 0; py < AUDIO_ICON_HEIGHT; py++) {
+    for (int px = 0; px < AUDIO_ICON_WIDTH; px++) {
+      uint16_t color = pgm_read_word(&iconSrc[py * AUDIO_ICON_WIDTH + px]);
+      
+      if (color != 0x0000) { // Transparenter/schwarzer Hintergrund ignorieren
+        if (color == 0xF800 || color == 0xF800) { 
+          color = 0x07E0; // Rot zu Neongrün wandeln
+        }
+        spr.drawPixel(x + px, y + py, color);
+      }
+    }
   }
 }
 
-//
-// Draw RDS station name (also CB channel, etc)
-//
 void drawStationName(const char *name, int x, int y)
 {
   spr.setTextDatum(TC_DATUM);
@@ -428,9 +408,6 @@ void drawStationName(const char *name, int x, int y)
   spr.drawString(name, x, y, FONT_LARGE);
 }
 
-//
-// Draw long (EIBI) station name
-//
 void drawLongStationName(const char *name, int x, int y)
 {
   int width = spr.textWidth(name, FONT_SMALL);
@@ -453,9 +430,6 @@ void drawLongStationName(const char *name, int x, int y)
   }
 }
 
-//
-// Draw scan graphs
-//
 void drawScanGraphs(uint32_t freq)
 {
   int16_t offset = (freq % 10) / 10.0 * 8;
@@ -498,9 +472,6 @@ void drawScanGraphs(uint32_t freq)
   spr.drawLine(160, 130, 160, 169, TH.scale_pointer);
 }
 
-//
-// Hauptfunktion zum Zeichnen des Bildschirms
-//
 void drawScreen()
 {
   if(sleepOn()) return;
@@ -523,7 +494,6 @@ void drawScreen()
       break;
   }
 
-  // DYNAMISCHER WECHSEL: SKALA <-> EQUALIZER
   if ((millis() - lastTuneTime) > 3000) 
   {
     drawBlockEqualizer(10, 142, 300, 26);
