@@ -45,12 +45,12 @@ void drawLayoutDefault()
     currentCmd == CMD_FREQ ? getFreqInputPos() + (pushAndRotate ? 0x80 : 0) : 100
   );
 
-  // Show station or channel name, if present
+    // Show station or channel name, if present (etwas höher platziert, damit es nicht mit S:/SNR kollidiert)
   const char *stationName = getStationName();
   if(*stationName == 0xFF)
-    drawLongStationName(stationName + 1, MENU_OFFSET_X + 1 + 76 + MENU_DELTA_X + 2, RDS_OFFSET_Y);
+    drawLongStationName(stationName + 1, MENU_OFFSET_X + 1 + 76 + MENU_DELTA_X + 2, RDS_OFFSET_Y - 18);
   else if(*stationName)
-    drawStationName(stationName, RDS_OFFSET_X, RDS_OFFSET_Y);
+    drawStationName(stationName, RDS_OFFSET_X, RDS_OFFSET_Y - 18);
 
   // Draw left-side menu/info bar
   // @@@ FIXME: Frequency display (above) intersects the side bar!
