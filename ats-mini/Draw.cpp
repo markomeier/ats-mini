@@ -5,7 +5,7 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
-#include "Audio_icons.h" // Enthält die Icon-Daten (img_mono)[span_0](start_span)[span_0](end_span)[span_1](start_span)[span_1](end_span)
+// Audio_icons.h komplett entfernt
 
 extern void drawLayoutSmeter();
 extern void drawLayoutDefault();
@@ -14,47 +14,33 @@ extern void drawAbout();
 uint32_t lastTuneTime = 0;
 
 //
-// La Linea als rockender Gitarrist (nur die Lauf-Figur mit programmierter E-Gitarre)
+// La Linea als reiner Code-Gitarrist auf Höhe der MHz-Zahl
 //
 void drawRunningMan(int x, int y, int width, int height) {
-    // Löscht den Bereich auf Höhe der MHz-Anzeige oben rechts sauber frei
+    // Bereich oben rechts auf MHz-Höhe sauber löschen
     spr.fillRect(160, 25, 155, 35, TH.bg);
 
-    // Berechne die horizontale Bewegung von links nach rechts im oberen Bereich
+    // Berechne die horizontale Bewegung von links nach rechts
     uint32_t animCycle = (millis() / 35) % 130; 
     int manX = 170 + animCycle;
-    int manY = 28; // Auf Höhe der MHz-Zahl platziert
+    int manY = 32; // Auf Höhe der MHz-Zahl platziert
 
-    // Zeichnet die linke Hälfte des Bitmaps (nur den flüchtenden Mann ohne Nudelholz-Figur)[span_2](start_span)[span_2](end_span)
-    for (int py = 0; py < AUDIO_ICON_HEIGHT; py++) {
-        for (int px = 0; px < (AUDIO_ICON_WIDTH / 2); px++) {
-            uint16_t color = pgm_read_word(&img_mono[py * AUDIO_ICON_WIDTH + px]);[span_3](start_span)[span_3](end_span)
-            
-            if (color != 0x0000) { 
-                if (color == 0xF800) { 
-                    color = 0x07E0; // Rot zu Neongrün konvertieren
-                }
-                
-                int drawX = manX + px;
-                int drawY = manY + py;
-                
-                // Dicke Linien für bessere Erkennbarkeit auf dem Display
-                if (drawX >= 160 && drawX < 315 && drawY >= 25 && drawY < 65) {
-                    spr.drawPixel(drawX, drawY, color);
-                    spr.drawPixel(drawX + 1, drawY, color);     
-                    spr.drawPixel(drawX, drawY + 1, color);     
-                }
-            }
-        }
-    }
+    uint16_t col = 0x07E0; // Neongrün
 
-    // E-Gitarre dynamisch in die Hände setzen (Gitarrenhals und Korpus in Neongrün 0x07E0)
-    // Gitarrenhals diagonal nach oben links
-    spr.drawLine(manX + 4,  manY + 10, manX - 6,  manY + 2,  0x07E0);
-    spr.drawLine(manX + 5,  manY + 10, manX - 5,  manY + 2,  0x07E0);
-    // Gitarrenkorpus / Kopfplatte
-    spr.drawRect(manX + 2,  manY + 9,  5, 5, 0x07E0);
-    spr.drawPixel(manX - 7, manY + 1,  0x07E0);
+    // Minimalistische Strichzeichnung (La Linea Körper & Kopf)
+    // Kopf
+    spr.drawCircle(manX + 8, manY + 4, 3, col);
+    // Körper / Rückenlinie
+    spr.drawLine(manX + 7, manY + 7,  manX + 4,  manY + 16, col);
+    // Beine (laufend angedeutet)
+    spr.drawLine(manX + 4, manY + 16, manX + 1,  manY + 22, col);
+    spr.drawLine(manX + 4, manY + 16, manX + 9,  manY + 22, col);
+    // Arme
+    spr.drawLine(manX + 6, manY + 10, manX + 12, manY + 13, col);
+
+    // E-Gitarre in den Händen (Hals diagonal, Korpus)
+    spr.drawLine(manX + 3,  manY + 11, manX + 14, manY + 7,  col); // Gitarrenhals
+    spr.drawRect(manX + 11, manY + 6,  4, 4, col);                // Korpus / Kopfplatte
 }
 
 void drawSaveIndicator(int x, int y)
