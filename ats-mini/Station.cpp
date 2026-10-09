@@ -70,10 +70,6 @@ static char bufRadioText[100]   = "";
 static char bufProgramInfo[100] = "";
 static uint16_t piCode = 0x0000;
 
-// SPERRE FÜR FLÜSSIGES UI: Verhindert Dauer-I2C-Polling
-static bool rdsLocked = false; 
-static uint32_t rdsStartTimer = 0;
-
 const char *getStationName()
 {
   if(switchThemeEditor())
@@ -114,10 +110,6 @@ void clearStationInfo()
   bufRadioText[0]   = '\0'; // Multiline!
   bufRadioText[1]   = '\0';
   piCode = 0x0000;
-
-  // Sperre bei Senderwechsel/Reset aufheben und Timer neu starten
-  rdsLocked = false; 
-  rdsStartTimer = millis();
 }
 
 static bool showStationName(const char *stationName, bool isLong = false)
@@ -134,13 +126,6 @@ static bool showStationName(const char *stationName, bool isLong = false)
     else
     {
       strcpy(bufStationName, stationName);
-      
-      // OPTIMIERTER LOCK MIT 10 SEKUNDEN TIMEOUT:
-      // Wartet auf vollen 8-Zeichen-Block oder gibt nach 10s (Antenne ausrichten) frei
-      size_t len = strlen(stationName);
-      if(len >= 8 || (millis() - rdsStartTimer > 10000 && len >= 2)) {
-        rdsLocked = true;
-      }
     }
     return(true);
   }
@@ -237,9 +222,6 @@ static bool showRdsTime()
 
 bool checkRds()
 {
-  // WENN RDS GELOCKT IST: Keine I2C-Abfragen mehr -> Der Equalizer läuft butterweich!
-  if(rdsLocked) return false;
-
   bool needRedraw = false;
   uint8_t mode = getRDSMode();
 
