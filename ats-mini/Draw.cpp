@@ -5,7 +5,7 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
-#include "Audio_icons.h" // Enthält die Icon-Definitionen[span_0](start_span)[span_0](end_span)
+#include "Audio_icons.h" // Enthält img_mono (80x45)[span_1](start_span)[span_1](end_span)
 
 extern void drawLayoutSmeter();
 extern void drawLayoutDefault();
@@ -14,7 +14,7 @@ extern void drawAbout();
 uint32_t lastTuneTime = 0;
 
 //
-// La Linea Lauf-Animation (mit dicken, gut erkennbaren Linien)
+// La Linea Lauf-Animation (Läuft nach 3 Sek. Inaktivität los, mit dichten Linien)
 //
 void drawRunningMan(int x, int y, int width, int height) {
     // Bereich unter der Skala sauber löschen, ohne den Rahmen zu beschädigen
@@ -25,10 +25,10 @@ void drawRunningMan(int x, int y, int width, int height) {
     int manX = x + animCycle;
     int manY = y + (height / 2) - 12; // Vertikal zentriert
 
-    // Zeichnet das La Linea Männchen (aus img_mono[span_1](start_span)[span_1](end_span)) mit dicker Strichstärke
+    // Zeichnet das La Linea Männchen (aus img_mono) mit dicker Strichstärke
     for (int py = 0; py < AUDIO_ICON_HEIGHT; py++) {
         for (int px = 0; px < AUDIO_ICON_WIDTH; px++) {
-            uint16_t color = pgm_read_word(&img_mono[py * AUDIO_ICON_WIDTH + px]);[span_2](start_span)[span_2](end_span)
+            uint16_t color = pgm_read_word(&img_mono[py * AUDIO_ICON_WIDTH + px]);
             
             if (color != 0x0000) { 
                 if (color == 0xF800) { 
