@@ -5,7 +5,7 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
-#include "Audio_icons.h" // Inkl. img_stereo & img_mono
+#include "Audio_icons.h" // Enthält die Icon-Definitionen[span_0](start_span)[span_0](end_span)
 
 extern void drawLayoutSmeter();
 extern void drawLayoutDefault();
@@ -13,58 +13,36 @@ extern void drawAbout();
 
 uint32_t lastTuneTime = 0;
 
-// Schnelle Sinus-Lookuptabelle (Integer) für Ruckelfreiheit ohne FPU-Lags
-static const uint8_t sinTable[16] = { 0, 1, 3, 4, 5, 5, 5, 4, 3, 1, 0, 0, 0, 0, 0, 0 };
-
-void drawBlockEqualizer(int x, int y, int width, int height) {
-    // Wischt erst ab y=126, damit der gelbe Rahmen der Statusbox intakt bleibt!
+//
+// La Linea Lauf-Animation (mit dicken, gut erkennbaren Linien)
+//
+void drawRunningMan(int x, int y, int width, int height) {
+    // Bereich unter der Skala sauber löschen, ohne den Rahmen zu beschädigen
     spr.fillRect(0, 126, 320, 47, TH.bg);
 
-    const int numBands = 18;        
-    const int blocksPerBand = 6;    
-    
-    int totalSpacing = (numBands - 1) * 2; 
-    int bandWidth = (width - totalSpacing) / numBands; 
+    // Berechne eine X-Position, die langsam von links nach rechts über das Display wandert
+    uint32_t animCycle = (millis() / 30) % (width - 24); 
+    int manX = x + animCycle;
+    int manY = y + (height / 2) - 12; // Vertikal zentriert
 
-    const uint16_t blockColors[6] = {
-        0x001F, // Blau
-        0x07E0, // Grün
-        0x87E0, // Gelb-Grün
-        0xFFE0, // Gelb
-        0xFCA0, // Orange
-        0xF800  // Rot
-    };
-
-    // Empfangswerte alle 200ms cachen, um I2C-Traffic beim Rendern zu verringern
-    static int cachedSNR = 10;
-    static int cachedRSSI = 20;
-    static uint32_t lastRFCheck = 0;
-
-    if (millis() - lastRFCheck > 200) {
-        cachedSNR = rx.getCurrentSNR();
-        cachedRSSI = rx.getCurrentRSSI();
-        lastRFCheck = millis();
-    }
-    
-    int baseLevel = map(constrain(cachedSNR, 0, 15), 0, 15, 1, blocksPerBand);
-    uint32_t animTick = millis() / 40; 
-
-    for (int b = 0; b < numBands; b++) {
-        int posX = x + b * (bandWidth + 2);
-
-        int offsetIdx = (animTick + b * 2) % 16;
-        int animOffset = sinTable[offsetIdx];
-
-        int activeBlocks = constrain(baseLevel + animOffset - 1, 0, blocksPerBand);
-        if (cachedRSSI < 3) activeBlocks = 0;
-
-        for (int i = 0; i < blocksPerBand; i++) {
-            int posY = y + height - ((i + 1) * 4);
-
-            if (i < activeBlocks) {
-                spr.fillRect(posX, posY, bandWidth, 3, blockColors[i]);
-            } else {
-                spr.fillRect(posX, posY, bandWidth, 3, 0x18E3);
+    // Zeichnet das La Linea Männchen (aus img_mono[span_1](start_span)[span_1](end_span)) mit dicker Strichstärke
+    for (int py = 0; py < AUDIO_ICON_HEIGHT; py++) {
+        for (int px = 0; px < AUDIO_ICON_WIDTH; px++) {
+            uint16_t color = pgm_read_word(&img_mono[py * AUDIO_ICON_WIDTH + px]);[span_2](start_span)[span_2](end_span)
+            
+            if (color != 0x0000) { 
+                if (color == 0xF800) { 
+                    color = 0x07E0; // Rot zu Neongrün wandeln
+                }
+                if (px < 24 && py < 24) {
+                    // 2x2 Pixelblock pro Punkt für kräftige, dicke Linien
+                    int drawX = manX + px;
+                    int drawY = manY + (py - 12);
+                    spr.drawPixel(drawX, drawY, color);
+                    spr.drawPixel(drawX + 1, drawY, color);     
+                    spr.drawPixel(drawX, drawY + 1, color);     
+                    spr.drawPixel(drawX + 1, drawY + 1, color); 
+                }
             }
         }
     }
@@ -380,25 +358,11 @@ void drawSMeter(int strength, int x, int y)
 }
 
 //
-// Draw stereo indicator (LA LINEA ICONS MIT KOORDINATEN- UND FARBKORREKTUR ROT -> GRÜN)
+// Stereo-Indikator entfernt
 //
 void drawStereoIndicator(int x, int y, bool stereo)
 {
-  const uint16_t *iconSrc = stereo ? img_stereo : img_mono;
-  
-  // Rendert die Bitmap Pixel für Pixel mit Farbkorrektur von Rot (0xF800) auf Neongrün (0x07E0)
-  for (int py = 0; py < AUDIO_ICON_HEIGHT; py++) {
-    for (int px = 0; px < AUDIO_ICON_WIDTH; px++) {
-      uint16_t color = pgm_read_word(&iconSrc[py * AUDIO_ICON_WIDTH + px]);
-      
-      if (color != 0x0000) { // Transparenter/schwarzer Hintergrund ignorieren
-        if (color == 0xF800 || color == 0xF800) { 
-          color = 0x07E0; // Rot zu Neongrün wandeln
-        }
-        spr.drawPixel(x + px, y + py, color);
-      }
-    }
-  }
+  // Absichtlich leer
 }
 
 void drawStationName(const char *name, int x, int y)
@@ -494,9 +458,10 @@ void drawScreen()
       break;
   }
 
+  // Nach 3 Sekunden Inaktivität rennt das dicke La Linea Männchen los
   if ((millis() - lastTuneTime) > 3000) 
   {
-    drawBlockEqualizer(10, 142, 300, 26);
+    drawRunningMan(10, 142, 300, 26);
   } 
   else 
   {
