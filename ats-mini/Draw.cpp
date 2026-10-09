@@ -5,43 +5,10 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
-// Audio_icons.h komplett entfernt
 
 extern void drawLayoutSmeter();
 extern void drawLayoutDefault();
 extern void drawAbout();
-
-uint32_t lastTuneTime = 0;
-
-//
-// La Linea als reiner Code-Gitarrist auf Höhe der MHz-Zahl
-//
-void drawRunningMan(int x, int y, int width, int height) {
-    // Bereich oben rechts auf MHz-Höhe sauber löschen
-    spr.fillRect(160, 25, 155, 35, TH.bg);
-
-    // Berechne die horizontale Bewegung von links nach rechts
-    uint32_t animCycle = (millis() / 35) % 130; 
-    int manX = 170 + animCycle;
-    int manY = 32; // Auf Höhe der MHz-Zahl platziert
-
-    uint16_t col = 0x07E0; // Neongrün
-
-    // Minimalistische Strichzeichnung (La Linea Körper & Kopf)
-    // Kopf
-    spr.drawCircle(manX + 8, manY + 4, 3, col);
-    // Körper / Rückenlinie
-    spr.drawLine(manX + 7, manY + 7,  manX + 4,  manY + 16, col);
-    // Beine (laufend angedeutet)
-    spr.drawLine(manX + 4, manY + 16, manX + 1,  manY + 22, col);
-    spr.drawLine(manX + 4, manY + 16, manX + 9,  manY + 22, col);
-    // Arme
-    spr.drawLine(manX + 6, manY + 10, manX + 12, manY + 13, col);
-
-    // E-Gitarre in den Händen (Hals diagonal, Korpus)
-    spr.drawLine(manX + 3,  manY + 11, manX + 14, manY + 7,  col); // Gitarrenhals
-    spr.drawRect(manX + 11, manY + 6,  4, 4, col);                // Korpus / Kopfplatte
-}
 
 void drawSaveIndicator(int x, int y)
 {
@@ -153,6 +120,7 @@ void drawRadioText(int y, int ymax)
 void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 {
   static uint32_t lastFreq = 0;
+  static uint32_t lastTuneTime = 0;
 
   if (freq != lastFreq) {
     lastFreq = freq;
@@ -354,7 +322,7 @@ void drawSMeter(int strength, int x, int y)
 
 void drawStereoIndicator(int x, int y, bool stereo)
 {
-  // Absichtlich leer
+  // Originales Verhalten ohne La Linea
 }
 
 void drawStationName(const char *name, int x, int y)
@@ -450,14 +418,7 @@ void drawScreen()
       break;
   }
 
-  // Die Skala bleibt unten immer voll erhalten
   drawScale(currentFrequency);
-
-  // Wenn länger als 3 Sekunden nicht getuned wurde, rockt La Linea mit Gitarre oben vorbei
-  if ((millis() - lastTuneTime) > 3000) 
-  {
-    drawRunningMan(10, 142, 300, 26);
-  }
 
   spr.pushSprite(0, 0);
 }
