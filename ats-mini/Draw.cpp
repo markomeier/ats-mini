@@ -5,7 +5,7 @@
 #include "Menu.h"
 #include "BleMode.h"
 #include "Draw.h"
-#include "Audio_icons.h" // Enthält img_mono (80x45)[span_1](start_span)[span_1](end_span)
+#include "Audio_icons.h" // Enthält img_mono[span_0](start_span)[span_0](end_span)[span_1](start_span)[span_1](end_span)
 
 extern void drawLayoutSmeter();
 extern void drawLayoutDefault();
@@ -14,34 +14,35 @@ extern void drawAbout();
 uint32_t lastTuneTime = 0;
 
 //
-// La Linea Lauf-Animation (Läuft nach 3 Sek. Inaktivität los, mit dichten Linien)
+// La Linea Lauf-Animation (startet nach 3 Sek., lässt das linke Kästchen in Ruhe)
 //
 void drawRunningMan(int x, int y, int width, int height) {
-    // Bereich unter der Skala sauber löschen, ohne den Rahmen zu beschädigen
-    spr.fillRect(0, 126, 320, 47, TH.bg);
+    // WICHTIG: Erst ab X = 110 löschen, damit das linke Status-Kästchen nicht überschrieben wird!
+    spr.fillRect(110, y, 205, height, TH.bg);
 
-    // Berechne eine X-Position, die langsam von links nach rechts über das Display wandert
-    uint32_t animCycle = (millis() / 30) % (width - 24); 
-    int manX = x + animCycle;
-    int manY = y + (height / 2) - 12; // Vertikal zentriert
+    // Berechne die X-Position für die Laufbewegung im rechten Bereich
+    uint32_t animCycle = (millis() / 35) % 150; 
+    int manX = 115 + animCycle;
+    int manY = y + (height / 2) - (AUDIO_ICON_HEIGHT / 2);
 
-    // Zeichnet das La Linea Männchen (aus img_mono) mit dicker Strichstärke
+    // Zeichnet das La Linea Männchen aus dem img_mono Array[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span)
     for (int py = 0; py < AUDIO_ICON_HEIGHT; py++) {
         for (int px = 0; px < AUDIO_ICON_WIDTH; px++) {
-            uint16_t color = pgm_read_word(&img_mono[py * AUDIO_ICON_WIDTH + px]);
+            uint16_t color = pgm_read_word(&img_mono[py * AUDIO_ICON_WIDTH + px]);[span_4](start_span)[span_4](end_span)
             
             if (color != 0x0000) { 
                 if (color == 0xF800) { 
                     color = 0x07E0; // Rot zu Neongrün wandeln
                 }
-                if (px < 24 && py < 24) {
-                    // 2x2 Pixelblock pro Punkt für kräftige, dicke Linien
-                    int drawX = manX + px;
-                    int drawY = manY + (py - 12);
+                
+                int drawX = manX + px;
+                int drawY = manY + py;
+                
+                // Nur im gültigen Bereich rechts der Statusbox zeichnen (mit leichter Dicke)
+                if (drawX >= 110 && drawX < 315 && drawY >= y && drawY < y + height) {
                     spr.drawPixel(drawX, drawY, color);
                     spr.drawPixel(drawX + 1, drawY, color);     
                     spr.drawPixel(drawX, drawY + 1, color);     
-                    spr.drawPixel(drawX + 1, drawY + 1, color); 
                 }
             }
         }
@@ -458,7 +459,7 @@ void drawScreen()
       break;
   }
 
-  // Nach 3 Sekunden Inaktivität rennt das dicke La Linea Männchen los
+  // Nach 3 Sekunden Inaktivität rennt La Linea auf der rechten Seite vorbei (ohne das linke Kästchen zu beschädigen)
   if ((millis() - lastTuneTime) > 3000) 
   {
     drawRunningMan(10, 142, 300, 26);
