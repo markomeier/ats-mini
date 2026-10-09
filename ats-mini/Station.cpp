@@ -72,6 +72,7 @@ static uint16_t piCode = 0x0000;
 
 // SPERRE FÜR FLÜSSIGES UI: Verhindert Dauer-I2C-Polling
 static bool rdsLocked = false; 
+static uint32_t rdsStartTimer = 0;
 
 const char *getStationName()
 {
@@ -114,8 +115,9 @@ void clearStationInfo()
   bufRadioText[1]   = '\0';
   piCode = 0x0000;
 
-  // Sperre bei Senderwechsel/Reset aufheben
+  // Sperre bei Senderwechsel/Reset aufheben und Timer neu starten
   rdsLocked = false; 
+  rdsStartTimer = millis();
 }
 
 static bool showStationName(const char *stationName, bool isLong = false)
@@ -132,8 +134,11 @@ static bool showStationName(const char *stationName, bool isLong = false)
     else
     {
       strcpy(bufStationName, stationName);
-      // Sobald ein echter Stationsname geladen ist -> RDS-Polling einfrieren!
-      if(strlen(stationName) > 1) {
+      
+      // OPTIMIERTER LOCK MIT 10 SEKUNDEN TIMEOUT:
+      // Wartet auf vollen 8-Zeichen-Block oder gibt nach 10s (Antenne ausrichten) frei
+      size_t len = strlen(stationName);
+      if(len >= 8 || (millis() - rdsStartTimer > 10000 && len >= 2)) {
         rdsLocked = true;
       }
     }
