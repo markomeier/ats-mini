@@ -1,6 +1,11 @@
-Neuestes Release: v1.03 mit folgenden Änderungen:
+Neuestes Release: v1.04 mit folgenden Änderungen:
 
 🛠️ Changelog / Versionshinweise
+
+* Moved memory station names upward to avoid overlapping with the signal strength (S/SNR) display. 
+
+
+Release v1.03
 📻 Skala & Tuning-Optik (Klassischer Röhrenradio-Stil)
 Design-Anpassungen:
 Roter Indikator-Kreis (x=160, y=140) und prägnanter roter Zeigerstrich (2\text{ px} breit) im klassischen Röhrenradio-Look.
