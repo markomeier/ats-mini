@@ -10,19 +10,21 @@ class SI4735_fixed: public SI4735
       SI4735::setFM(fromFreq, toFreq, initialFreq, step);
     }
 
-    // Vollständige Umgehung der 150-kHz-Sperre in der Basisbibliothek für AM
+    // AM komplett ohne die 150-kHz-Sperre der Basisbibliothek initialisieren
     void setAM(uint16_t fromFreq, uint16_t toFreq, uint16_t initialFreq, uint16_t step)
     {
       currentFrequencyParams.arg.USBLSB = 0;
       
-      // Erzwinge den Start ab 100 kHz (VLF/LW-Bereich)
+      // Untere Grenze auf 100 kHz öffnen
       if (fromFreq < 100) fromFreq = 100;
 
-      // Antennenkapazität für Langwelle/Mittelwelle optimal setzen
-      setTuneFrequencyAntennaCapacitor(0);
-      
-      // Basisaufruf mit dem modifizierten Minimalwert
+      // Basisaufruf mit dem korrigierten Startwert
       SI4735::setAM(fromFreq, toFreq, initialFreq, step);
+      
+      // Erzwinge die Frequenz direkt, falls sie unter dem harten Bibliothekslimit liegt
+      if (initialFreq < 150) {
+        setFrequency(initialFreq);
+      }
     }
 
     // AM patch loading without SSB-specific properties. A null content
