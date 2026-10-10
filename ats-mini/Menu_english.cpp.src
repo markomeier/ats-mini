@@ -33,8 +33,8 @@ Band bands[] =
 {
   {"VHF",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 2, 0, 0, 0},
   {"DWD LF", SW_BAND_TYPE, USB,   100,   300,   147, 5, 4, 0, 0},
-  // All band. LW, MW and SW (from 100 kHz to 30 MHz)
-  {"ALL",  SW_BAND_TYPE, AM,    100, 30000, 15000, 1, 4, 0, 0},
+  // All band. LW, MW and SW (from 149 kHz to 30 MHz)
+  {"ALL",  SW_BAND_TYPE, AM,    149, 30000, 15000, 1, 4, 0, 0},
   {"11M",  SW_BAND_TYPE, AM,  25600, 26100, 25850, 1, 4, 0, 0},
   {"13M",  SW_BAND_TYPE, AM,  21500, 21900, 21650, 1, 4, 0, 0},
   {"15M",  SW_BAND_TYPE, AM,  18900, 19100, 18950, 1, 4, 0, 0},
@@ -57,7 +57,7 @@ Band bands[] =
 //  {"90M",  SW_BAND_TYPE, AM,   3200,  3400,  3300, 1, 4, 0},
   {"MW3",  MW_BAND_TYPE, AM,   1700,  3500,  2500, 1, 4, 0, 0},
   {"MW2",  MW_BAND_TYPE, AM,    495,  1701,   783, 2, 4, 0, 0},
-  {"MW1",  MW_BAND_TYPE, AM,    100,  1800,   810, 3, 4, 0, 0},
+  {"MW1",  MW_BAND_TYPE, AM,    149,  1800,   810, 3, 4, 0, 0},
   {"160M", MW_BAND_TYPE, LSB,  1800,  2000,  1900, 5, 4, 0, 0},
   {"80M",  SW_BAND_TYPE, LSB,  3500,  4000,  3800, 5, 4, 0, 0},
   {"40M",  SW_BAND_TYPE, LSB,  7000,  7300,  7150, 5, 4, 0, 0},
