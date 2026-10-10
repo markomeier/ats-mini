@@ -366,17 +366,19 @@ void useBand(const Band *band)
   currentBFO = 0;
   ssbAvcHold = false;
 
-  if(band->bandMode==FM)
+    if(band->bandMode==FM)
   {
     // rx.setMaxDelaySetFrequency(60);
     rx.setFM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
-    // rx.setTuneFrequencyAntennaCapacitor(0);
+    
+    // Antennen-Kondensator für maximale Empfindlichkeit aktivieren (kann bei Bedarf auf 0 oder 1 getestet werden)
+    rx.setTuneFrequencyAntennaCapacitor(1); 
+    
     rx.setSeekFmLimits(band->minimumFreq, band->maximumFreq);
 
-    // More sensitive seek thresholds
-    // https://github.com/pu2clr/SI4735/issues/7#issuecomment-810963604
-    rx.setSeekFmRssiThreshold(5); // default is 20
-    rx.setSeekFmSNRThreshold(2); // default is 3
+    // Ultra-sensitive Suchlauf-Schwellen (auf Minimum gesetzt, um auch die schwächsten Sender zu erwischen)
+    rx.setSeekFmRssiThreshold(0); // 0 = Kein RSSI-Filter beim Scan
+    rx.setSeekFmSNRThreshold(1); // 1 = Extrem niedrige SNR-Hürde
 
     rx.setFMDeEmphasis(fmRegions[FmRegionIdx].value);
     applyFmStereo();
