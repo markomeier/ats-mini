@@ -986,7 +986,7 @@ void loop()
   // Periodically check received RDS information
   if((currentTime - lastRDSCheck) > RDS_CHECK_TIME)
   {
-    needRedraw |= (currentMode == FM) && (snr >= 9) && checkRds();
+    needRedraw |= (currentMode == FM) && (snr >= 5) && checkRds();
     lastRDSCheck = currentTime;
   }
 
