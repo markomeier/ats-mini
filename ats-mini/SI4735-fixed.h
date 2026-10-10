@@ -10,10 +10,11 @@ class SI4735_fixed: public SI4735
       SI4735::setFM(fromFreq, toFreq, initialFreq, step);
     }
 
-    // Clear stale SSB sideband bits before the first AM tune
+    // Clear stale SSB sideband bits before the first AM tune and enforce 100 kHz limit
     void setAM(uint16_t fromFreq, uint16_t toFreq, uint16_t initialFreq, uint16_t step)
     {
       currentFrequencyParams.arg.USBLSB = 0;
+      if (fromFreq < 100) fromFreq = 100;
       SI4735::setAM(fromFreq, toFreq, initialFreq, step);
     }
 
@@ -108,8 +109,6 @@ class SI4735_fixed: public SI4735
     }
 
     // Decode UTC time directly from the RDS data blocks.
-    // SI4735::getRdsDateTime() converts it to the broadcaster's local time,
-    // which cannot be converted back reliably from clock-face times alone.
     bool getRdsUTCEpoch(uint32_t *epoch)
     {
       if(!epoch || getRdsGroupType() != 4 || getRdsVersionCode()) return(false);
@@ -127,8 +126,6 @@ class SI4735_fixed: public SI4735
       const uint32_t unixEpochMJD = 40587;
       uint32_t seconds = (hour * 60 + minute) * 60;
 
-      // Preserve the time of day when the transmitted date cannot be
-      // represented by the 32-bit epoch used by NTPClient.
       if(mjd < unixEpochMJD || mjd - unixEpochMJD > (UINT32_MAX - seconds) / 86400)
         *epoch = seconds;
       else
@@ -163,37 +160,4 @@ class SI4735_fixed: public SI4735
 
     } while (!currentStatus.resp.VALID && !currentStatus.resp.BLTF && (millis() - elapsed_seek) < maxSeekTime);
   }
-
-#if 0
-    // Speeding up SI4735::downloadPatch() function
-    bool downloadPatch(const uint8_t *ssb_patch_content, const uint16_t ssb_patch_content_size)
-    {
-      for(uint16_t offset=0 ; offset<ssb_patch_content_size ; offset+=8)
-      {
-        Wire.beginTransmission(deviceAddress);
-
-        for(uint16_t i=0 ; i<8 ; i++)
-          Wire.write(pgm_read_byte_near(ssb_patch_content + (i + offset)));
-
-        Wire.endTransmission();
-        waitToSend();
-      }
-
-      delayMicroseconds(250);
-      return true;
-    }
-
-    // Using the new downloadPatch() function here
-    void loadPatch(const uint8_t *ssb_patch_content, const uint16_t ssb_patch_content_size, uint8_t ssb_audiobw)
-    {
-      queryLibraryId();                                                                                                       patchPowerUp();
-      delay(50);                                                                                                              downloadPatch(ssb_patch_content, ssb_patch_content_size);                                                               // Parameters                                                                                                           // AUDIOBW - SSB Audio bandwidth; 0 = 1.2kHz (default); 1=2.2kHz; 2=3kHz; 3=4kHz; 4=500Hz; 5=1kHz;
-      // SBCUTFLT SSB - side band cutoff filter for band passand low pass filter ( 0 or 1)                                    // AVC_DIVIDER  - set 0 for SSB mode; set 3 for SYNC mode.
-      // AVCEN - SSB Automatic Volume Control (AVC) enable; 0=disable; 1=enable (default).
-      // SMUTESEL - SSB Soft-mute Based on RSSI or SNR (0 or 1).
-      // DSP_AFCDIS - DSP AFC Disable or enable; 0=SYNC MODE, AFC enable; 1=SSB MODE, AFC disable.
-      setSSBConfig(ssb_audiobw, 1, 0, 0, 0, 1);
-      delay(25);
-    }
-#endif
 };
