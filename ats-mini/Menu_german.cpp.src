@@ -32,6 +32,8 @@ int bandIdx = 0;
 Band bands[] =
 {
   {"VHF",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 2, 0, 0, 0},
+ // Test-Eintrag für Flugfunk (118 MHz bis 137 MHz)
+  {"AIR",  FM_BAND_TYPE, AM,  11800, 13700, 12000, 1, 4, 0, 0},
   // All band. LW, MW and SW (from 150kHz to 30MHz)
   {"ALLE",  SW_BAND_TYPE, AM,    100, 30000, 15000, 1, 4, 0, 0},
   {"11M",  SW_BAND_TYPE, AM,  25600, 26100, 25850, 1, 4, 0, 0},
